@@ -1,5 +1,14 @@
 <script>
-  export let name;
+  export let apiURL;
+  import ApolloClient from 'apollo-boost';  
+  import { setClient, query } from 'svelte-apollo';
+  import { LISTS } from '../queries';
+
+  const client = new ApolloClient({ uri: apiURL });
+  setClient(client);
+
+  const lists = query(client, { query: LISTS });
+  $lists.then(console.log);
 </script>
 
 <style>

@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "apollo-boost": "^0.4.7",
+    "graphql": "^15.0.0",
     "svelte-apollo": "^0.3.0"
   }
 }
