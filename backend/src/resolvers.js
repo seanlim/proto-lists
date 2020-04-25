@@ -45,9 +45,7 @@ const Mutation = {
 
     return db.get(LISTS).find({id}).value();
   },
-  async listDestroy(root, { input }, { db }) {
-    const { id } = input;
-
+  async listDestroy(root, { id }, { db }) {
     const list = db.get(LISTS).find({ id }).value();
     if (!list) return new Error('List does not exist');
 
