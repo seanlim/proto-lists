@@ -1,29 +1,51 @@
 type Query {
-  list(id: ID!): List
-  task(id: ID!): Task
+  lists: [List]!
 }
 
 type Mutation {
-  taskCreate(input: TaskMutateInput!): Task
-  taskUpdate(input: TaskMutateInput!): Task!
-  taskComplete(id: ID!): Task!
+  listCreate(input: ListCreateInput!): List!
+  listUpdate(input: ListUpdateInput!): List!
+  listDestroy(id: ID!): Boolean!
+
+  taskCreate(input: TaskCreateInput!): Task
+  taskUpdate(input: TaskUpdateInput!): Task!
   taskDestroy(id: ID!): Boolean!
 }
 
 type List {
   id: ID!
   name: String!
-  items: [Task]!
+  tasks: [Task]!
 }
 
 type Task {
   id: ID!
+  listID: ID!
+  order: Int!
   description: String!
   done: Boolean!
   date: String
 }
 
-type TaskMutateInput {
+input ListCreateInput {
+  name: String!
+}
+input ListUpdateInput {
+  id: ID!
+  name: String!
+}
+
+input TaskCreateInput {
+  listID: ID!
+  order: Int! 
   description: String!
+  date: String
+}
+input TaskUpdateInput {
+  id: ID!
+  listID: ID!
+  order: Int! 
+  description: String!
+  done: Boolean!
   date: String
 }
