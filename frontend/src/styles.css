@@ -1,0 +1,32 @@
+:root {
+  --primary: #fafafa;
+  --secondary: #212121;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #212121;
+    --secondary: #fafafa
+  }
+}
+
+body {
+  font-family: sans-serif;
+  background-color: var(--primary);
+  color: var(--secondary);
+  position: absolute;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  height: 100%;
+  width: 100%;
+  margin: 0px;
+  line-height: 1.58;
+  word-break: break-word;
+  -ms-overflow-style: none;
+  overflow: -moz-scrollbars-none;
+  font-size: 19px;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}

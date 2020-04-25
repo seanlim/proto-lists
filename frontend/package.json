@@ -11,5 +11,9 @@
   "scripts": {
     "dev": "parcel src/index.html",
     "build": "parcel build src/index.html"
+  },
+  "dependencies": {
+    "apollo-boost": "^0.4.7",
+    "svelte-apollo": "^0.3.0"
   }
 }
