@@ -1,0 +1,19 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "lists backend",
+  "main": "index.js",
+  "author": "Sean Lim",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon --ignore db.json src/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "graphql-yoga": "^1.18.3",
+    "lowdb": "^1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.3"
+  }
+}
