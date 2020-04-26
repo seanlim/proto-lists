@@ -4,14 +4,18 @@
   import { setClient, query } from 'svelte-apollo';
   import { LISTS } from '../queries';
 
+  import List from './List';
+
   // Create new Apollo client
   const client = new ApolloClient({ uri: apiURL });
   setClient(client);
 
-  // Fetch data
+  // Fetch lists 
   const lists = query(client, { query: LISTS });
   $lists.then(console.log);
 
+  function addList() {
+  }
 </script>
 
 <style>
@@ -19,16 +23,30 @@
     height: 100%;
     display: flex;
     flex-direction: row;
-    border: solid red 1px;
     overflow-x: scroll;
   }
-  .list {
+  .add-list {
     padding: 15px;
+    user-select: none;
     height: 100%;
-    max-width: 33%;
-    min-width: 33%;
+    max-width: 50px;
+    min-width: 50px;
     flex: 1;
-    border-right: solid var(--secondary) 1px;
+    background: var(--gray);
+    color: var(--foreground);
+    font-size: 2em;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    border: solid 3px transparent;
+  }
+  .add-list:hover {
+    background: var(--background);
+    border: solid 3px var(--gray);
+  }
+  .add-list:hover:active {
+    background: var(--gray);
   }
 </style>
 
@@ -36,11 +54,16 @@
   Loading...
 {:then result}
   <div class="list-container">
-    {#each result.data.lists as list}
-      <div class="list">
-        <h2>{list.name}</h2>
-      </div>
-    {/each}
+    {#if result.data.lists.length < 1}
+      <p>No Lists!</p>
+    {:else}
+      {#each result.data.lists as list}
+        <List data={list} />
+      {/each}
+    {/if}
+    <div class="add-list" on:click={addList}>
+      <b>+</b>
+    </div>
   </div>
 {:catch error}
   Error: {error}
