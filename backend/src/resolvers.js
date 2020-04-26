@@ -15,7 +15,7 @@ const Query = {
   },
 };
 const Mutation = {
-  async listCreate(root, { input }, { db }) {k
+  async listCreate(root, { input }, { db }) {
     const { name } = input;
 
     const newList = {
