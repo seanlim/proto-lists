@@ -16,7 +16,6 @@
         }
       }
     })
-    .then(console.info)
     .catch(console.error);
   }
 
