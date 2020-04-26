@@ -16,10 +16,11 @@ const Query = {
 };
 const Mutation = {
   async listCreate(root, { input }, { db }) {
-    const { name } = input;
+    const { name, order } = input;
 
     const newList = {
       id: uuid(),
+      order,
       name,
       tasks: [],
     };
@@ -33,14 +34,17 @@ const Mutation = {
     return newList;
   },
   async listUpdate(root, { input }, { db }) {
-    const { id, name } = input;
+    const { id, order, name } = input;
 
     const list = db.get(LISTS).find({ id }).value();
     if (!list) return new Error('List does not exist');
 
     db.get(LISTS)
       .find({ id })
-      .assign({ name })
+      .assign({ 
+        name, 
+        order 
+      })
       .write();
 
     return db.get(LISTS).find({id}).value();

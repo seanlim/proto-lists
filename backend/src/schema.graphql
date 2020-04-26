@@ -14,6 +14,7 @@ type Mutation {
 
 type List {
   id: ID!
+  order: Int!
   name: String!
   tasks: [Task]!
 }
@@ -29,9 +30,11 @@ type Task {
 
 input ListCreateInput {
   name: String!
+  order: Int!
 }
 input ListUpdateInput {
   id: ID!
+  order: Int!
   name: String!
 }
 
