@@ -27,7 +27,7 @@
       variables: {
         input: {
           name : 'new list',
-          order: 0
+          order: $lists.length
         }
       }
     })

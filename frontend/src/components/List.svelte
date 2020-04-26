@@ -6,10 +6,9 @@
   .list {
     padding: 15px;
     height: 100%;
-    width: 33%;
-    min-width: 200px;
-    max-width: 300px;
     flex: 1;
+    min-width: 300px;
+    max-width: 400px;
     border-right: solid var(--gray) 1px;
   }
 </style>
