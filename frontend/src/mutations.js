@@ -5,6 +5,7 @@ export const LIST_CREATE = gql`
     listCreate(input: $input){
       id,
       name,
+      order,
       tasks {
         id
         listID
@@ -22,6 +23,7 @@ export const LIST_UPDATE = gql`
     listUpdate (input: $input){
       id,
       name,
+      order,
       tasks {
         id
         listID

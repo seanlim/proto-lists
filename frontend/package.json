@@ -5,7 +5,7 @@
   "license": "MIT",
   "browserslist": [
     "last 1 Chrome versions"
-    ],
+  ],
   "devDependencies": {
     "parcel-bundler": "^1.12.4",
     "parcel-plugin-svelte": "^4.0.6",

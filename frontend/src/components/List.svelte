@@ -1,5 +1,25 @@
 <script>
-  export let data;
+  export let list;
+  import { getClient, mutate } from 'svelte-apollo';
+  import { LIST_UPDATE } from '../mutations';
+
+  const client = getClient();
+
+  $: {
+    mutate(client, {
+      mutation: LIST_UPDATE,
+      variables: {
+        input: {
+          id: list.id,
+          order: list.order,
+          name: list.name,
+        }
+      }
+    })
+    .then(console.info)
+    .catch(console.error);
+  }
+
 </script>
 
 <style>
@@ -14,6 +34,6 @@
 </style>
 
 <div class="list">
-  <h2>{data.name}</h2>
+  <input bind:value={list.name} />
 </div>
 

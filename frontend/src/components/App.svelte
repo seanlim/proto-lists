@@ -31,7 +31,7 @@
         }
       }
     })
-    .then(({data}) => lists.update(l => ([data.listCreate, ...l])))
+    .then(({data}) => lists.update(l => ([...l, data.listCreate])))
     .catch(console.error);
   }
 
@@ -55,6 +55,7 @@
     text-align: center;
     justify-content: center;
     align-items: center;
+    color: var(--foreground);
   }
   .add-list {
     padding: 15px;
@@ -63,21 +64,22 @@
     max-width: 50px;
     min-width: 50px;
     flex: 1;
-    background: var(--gray);
+    background: var(--background);
     color: var(--foreground);
     font-size: 2em;
     display: flex;
     text-align: center;
     justify-content: center;
     align-items: center;
-    border: solid 3px var(--background);
+    border: solid 3px var(--foreground);
   }
   .add-list:hover {
-    background: var(--background);
-    border: solid 3px var(--gray);
+    background: var(--gray);
+    border: solid 3px transparent;
+    color: var(--foreground);
   }
   .add-list:hover:active {
-    background: var(--gray);
+    background: var(--background);
   }
 </style>
 
@@ -91,7 +93,7 @@
       </div>
     {:else}
       {#each $lists as list}
-        <List data={list} />
+        <List list={list} />
       {/each}
     {/if}
     <div class="add-list" on:click={addList}>
