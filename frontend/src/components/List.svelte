@@ -4,12 +4,13 @@
 
 <style>
   .list {
-    upadding: 15px;
+    padding: 15px;
     height: 100%;
-    max-width: 33%;
-    min-width: 33%;
+    width: 33%;
+    min-width: 200px;
+    max-width: 300px;
     flex: 1;
-    border-right: solid var(--foreground) 1px;
+    border-right: solid var(--gray) 1px;
   }
 </style>
 

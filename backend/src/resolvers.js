@@ -1,4 +1,4 @@
-const uuid = require('uuid/v4');
+const uuid = require('uuid').v4;
 
 const TASKS = 'tasks';
 const LISTS = 'lists';
