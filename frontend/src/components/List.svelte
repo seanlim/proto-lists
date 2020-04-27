@@ -22,7 +22,6 @@
     .catch(console.error);
   }
 
-  // TODO: Add task functionality
   function addTask(event){
     event.preventDefault();
     mutate(client, {
@@ -32,14 +31,19 @@
           listID: list.id,
           order: list.tasks.length,
           description: newTaskDescription,
-          date: ''
+          date: '' // TODO: Add date for task
         }
       }
     })
     .then(({data}) => {
-      list.tasks.push(data.taskCreate);
+      list.tasks = [...list.tasks, data.taskCreate];
+      resetNewTaskField();
     })
     .catch(console.error);
+  }
+
+  function resetNewTaskField() {
+    newTaskDescription = '';
   }
 
 </script>
