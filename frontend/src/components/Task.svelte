@@ -1,5 +1,9 @@
 <script>
+  import { getClient, mutate } from 'svelte-apollo';
   export let task;
+
+  const client = getClient();
+
 </script>
 
 <style>

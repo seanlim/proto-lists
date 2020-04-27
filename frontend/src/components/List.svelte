@@ -1,11 +1,12 @@
 <script>
   export let list;
   import { getClient, mutate } from 'svelte-apollo';
-  import { LIST_UPDATE } from '../mutations';
+  import { LIST_UPDATE, TASK_CREATE } from '../mutations';
   import Task from './Task';
 
   const client = getClient();
-  const task = {};
+
+  let newTaskDescription = '';
 
   $: {
     mutate(client, {
@@ -24,6 +25,21 @@
   // TODO: Add task functionality
   function addTask(event){
     event.preventDefault();
+    mutate(client, {
+      mutation: TASK_CREATE,
+      variables: {
+        input: {
+          listID: list.id,
+          order: list.tasks.length,
+          description: newTaskDescription,
+          date: ''
+        }
+      }
+    })
+    .then(({data}) => {
+      list.tasks.push(data.taskCreate);
+    })
+    .catch(console.error);
   }
 
 </script>
@@ -60,7 +76,7 @@
     <Task task={task} />
   {/each}
   <form on:submit={addTask}>
-    <input class="add-task" type="text" placeholder="&#x2607; Add task..." />
+    <input class="add-task" type="text" bind:value={newTaskDescription} placeholder="&#x2607; Add task..." />
   </form>
 </div>
 
