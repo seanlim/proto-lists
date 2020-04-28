@@ -51,18 +51,23 @@
 <style>
   .list {
     padding: 15px;
-    height: 100%;
     flex: 1;
     max-width: 400px;
     border-right: solid var(--gray) 1px;
     display: flex;
-    flex-direction: column
+    flex-direction: column;
+    overflow-y: scroll;
+  }
+
+  .list::-webkit-scrollbar {
+    display: none;
   }
 
   input[type=text] {
     color: var(--foreground);
     border: none;
     background: transparent;
+    font-family: san-serif;
     font-size: 23px;
   }
   input[type=text]:focus {
@@ -72,10 +77,13 @@
   .add-task {
     margin-top: 10px;
   }
+  .list-title {
+    font-weight: bold;
+  }
 </style>
 
 <div class="list">
-  <input type="text" bind:value={list.name} />
+  <input class="list-title" type="text" bind:value={list.name} />
   {#each list.tasks as task}
     <Task task={task} />
   {/each}

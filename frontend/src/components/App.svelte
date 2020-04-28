@@ -43,6 +43,7 @@
     display: flex;
     flex-direction: row;
     overflow-x: scroll;
+    overflow-y: hidden;
   }
   .no-list {
     padding: 15px;
@@ -60,7 +61,6 @@
   .add-list {
     padding: 15px;
     user-select: none;
-    height: 100%;
     max-width: 50px;
     min-width: 50px;
     flex: 1;
