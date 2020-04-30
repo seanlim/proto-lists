@@ -57,6 +57,10 @@ const Mutation = {
       .remove({id})
       .write();
 
+    db.get(TASKS)
+      .remove({listID: id})
+      .write();
+
     console.info(`DELETE ${JSON.stringify(list, null, 2)}`);
 
     return true;
