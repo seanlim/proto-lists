@@ -49,18 +49,14 @@
 </script>
 
 <style>
-  .list {
-    padding: 15px;
+  .list-content {
     flex: 1;
-    max-width: 400px;
-    min-width: 300px;
-    border-right: solid var(--gray) 1px;
     display: flex;
     flex-direction: column;
     overflow-y: scroll;
   }
 
-  .list::-webkit-scrollbar {
+  .list-content::-webkit-scrollbar {
     display: none;
   }
 
@@ -69,7 +65,7 @@
   }
 </style>
 
-<div class="list">
+<div class="list-content">
   <strong>
     <TextField bind:value={list.name} />
   </strong>

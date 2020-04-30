@@ -34,6 +34,14 @@
     margin-bottom: var(--list-padding);
   }
 
+  .task-done {
+    opacity: 0.5; 
+  }
+
+  .task:hover {
+    opacity: 1;
+  }
+
   input[type=checkbox] {
     margin-top: 10px;
     margin-right: 10px;
@@ -41,7 +49,7 @@
 
 </style>
 
-<div class="task">
+<div class="task" class:task-done={task.done}>
   <input type="checkbox" bind:checked={task.done} />
   <TextField bind:value={task.description} bind:strikethrough={task.done} />
 </div>

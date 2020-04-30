@@ -2,9 +2,11 @@
   export let apiURL;
   import ApolloClient from 'apollo-boost';  
   import { setClient, subscribe, mutate } from 'svelte-apollo';
+	import { fly } from 'svelte/transition';
   import { LISTS } from '../queries';
   import { LIST_CREATE } from '../mutations';
   import { lists } from '../stores';
+
 
   import List from './List';
 
@@ -45,6 +47,15 @@
     overflow-x: scroll;
     overflow-y: hidden;
   }
+  .list-wrapper {
+    padding: 15px;
+    flex: 1;
+    max-width: 400px;
+    min-width: 300px;
+    border-right: solid var(--gray) 1px;
+    display: flex;
+    overflow: hidden;
+  }
   .no-list {
     padding: 15px;
     height: 100%;
@@ -81,10 +92,24 @@
   .add-list:hover:active {
     background: var(--background);
   }
+
+  .loading {
+    font-weight: bold;
+    font-family: monospace;
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%)
+  }
+
 </style>
 
 {#if loading}
-  Loading...
+  <span class="loading">
+    Loading...
+  </span>
 {:else}
   <div class="list-container">
     {#if $lists.length < 1}
@@ -92,8 +117,10 @@
         <p>No Lists</p>
       </div>
     {:else}
-      {#each $lists as list}
-        <List list={list} />
+      {#each $lists as list (list.id)}
+        <div class="list-wrapper" in:fly="{{y: -100, duration: 300, delay: list.order * 100}}">
+          <List list={list} />
+        </div>
       {/each}
     {/if}
     <div class="add-list" on:click={addList}>
