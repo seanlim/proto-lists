@@ -1,7 +1,9 @@
 :root {
   --background: #fafafa;
   --foreground: #212121;
-  --gray: #f2f2f2;
+  --gray: #898989;
+  
+  --list-padding: 10px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -27,6 +29,7 @@ body {
   -ms-overflow-style: none;
   overflow: -moz-scrollbars-none;
   font-size: 19px;
+  overflow: hidden;
 }
 
 body::-webkit-scrollbar {

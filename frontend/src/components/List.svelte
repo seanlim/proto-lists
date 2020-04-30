@@ -3,6 +3,7 @@
   import { getClient, mutate } from 'svelte-apollo';
   import { LIST_UPDATE, TASK_CREATE } from '../mutations';
   import Task from './Task';
+  import TextField from './TextField';
 
   const client = getClient();
 
@@ -15,15 +16,14 @@
         input: {
           id: list.id,
           order: list.order,
-          name: list.name,
+          name: list.name.toString(),
         }
       }
     })
     .catch(console.error);
   }
 
-  function addTask(event){
-    event.preventDefault();
+  function addTask(){
     mutate(client, {
       mutation: TASK_CREATE,
       variables: {
@@ -63,32 +63,20 @@
     display: none;
   }
 
-  input[type=text] {
-    color: var(--foreground);
-    border: none;
-    background: transparent;
-    font-family: san-serif;
-    font-size: 23px;
-  }
-  input[type=text]:focus {
-    outline-width: 0;
-  }
-
-  .add-task {
-    margin-top: 10px;
-  }
   .list-title {
     font-weight: bold;
   }
 </style>
 
 <div class="list">
-  <input class="list-title" type="text" bind:value={list.name} />
+  <strong>
+    <TextField bind:value={list.name} />
+  </strong>
   {#each list.tasks as task}
+    <!-- We don't bind task here because we don't want to trigger updates to the ENTIRE list when we edit tasks  -->
+    <!-- TODO: Maybe try binding it BUT diffing in the reactive statement to prevent unecessary updates?    -->
     <Task task={task} />
   {/each}
-  <form on:submit={addTask}>
-    <input class="add-task" type="text" bind:value={newTaskDescription} placeholder="&#x2607; Add task..." />
-  </form>
+  <TextField bind:value={newTaskDescription} onSubmit={addTask} placeholder="&#x2607; Add task..." />
 </div>
 

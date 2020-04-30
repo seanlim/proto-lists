@@ -1,5 +1,7 @@
 <script>
   import { getClient, mutate } from 'svelte-apollo';
+  import TextField from './TextField';
+
   export let task;
 
   const client = getClient();
@@ -11,7 +13,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-top: 10px;
+    margin-bottom: var(--list-padding);
   }
 
   input[type=checkbox] {
@@ -20,21 +22,10 @@
     max-width: 10px;
   }
 
-  input[type=text] {
-    flex: 1;
-    color: var(--foreground);
-    border: none;
-    background: transparent;
-    font-size: 23px;
-  }
-  input[type=text]:focus {
-    outline-width: 0;
-  }
-
 </style>
 
 <div class="task">
   <input type="checkbox" bind:checked={task.done} />
-  <input type="text" bind:value={task.description} />
+  <TextField bind:value={task.description} bind:strikethrough={task.done} />
 </div>
 
