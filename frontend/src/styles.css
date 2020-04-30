@@ -3,7 +3,7 @@
   --foreground: #212121;
   --gray: #898989;
   
-  --list-padding: 10px;
+  --list-padding: 15px;
 }
 
 @media (prefers-color-scheme: dark) {

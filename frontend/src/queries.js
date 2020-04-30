@@ -8,8 +8,11 @@ export const LISTS = gql`
       order
       tasks {
         id
+        listID
+        order
         description
         done
+        date
       }
     }
   }

@@ -48,9 +48,9 @@
   .no-list {
     padding: 15px;
     height: 100%;
-    max-width: 20%;
-    min-width: 20%;
     flex: 1;
+    max-width: 400px;
+    min-width: 300px;
     border-right: solid var(--gray) 1px;
     display: flex;
     text-align: center;

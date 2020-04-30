@@ -1,10 +1,29 @@
 <script>
   import { getClient, mutate } from 'svelte-apollo';
+  import { TASK_UPDATE } from '../mutations';
+
   import TextField from './TextField';
 
   export let task;
 
   const client = getClient();
+
+  $: {
+    mutate(client, {
+      mutation: TASK_UPDATE,
+      variables: {
+        input: {
+          id: task.id,
+          listID: task.listID,
+          order: task.order,
+          description: task.description,
+          done: task.done,
+          date: task.date,
+        },
+      },
+    })
+    .catch(console.error);
+  }
 
 </script>
 
@@ -12,14 +31,12 @@
   .task {
     display: flex;
     flex-direction: row;
-    align-items: center;
     margin-bottom: var(--list-padding);
   }
 
   input[type=checkbox] {
+    margin-top: 10px;
     margin-right: 10px;
-    flex: 1;
-    max-width: 10px;
   }
 
 </style>

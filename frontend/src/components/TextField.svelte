@@ -10,7 +10,6 @@
 
 <style>
   .textfield {
-    padding: 10px 5px;
     width: 100%;
     display: flex;
     position: relative;

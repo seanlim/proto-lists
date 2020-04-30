@@ -53,6 +53,7 @@
     padding: 15px;
     flex: 1;
     max-width: 400px;
+    min-width: 300px;
     border-right: solid var(--gray) 1px;
     display: flex;
     flex-direction: column;
