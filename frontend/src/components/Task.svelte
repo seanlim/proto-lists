@@ -25,6 +25,23 @@
     .catch(console.error);
   }
 
+  // TODO: dragging and reordering tasks
+  function dragStart(e) {
+    console.info(e.target.dataset.index);
+  }
+
+  function dragOver(e) {
+    console.info('Drag over');
+  }
+
+  function dragLeave(e) {
+    console.info('Drag leave');
+  }
+  
+  function drop(e){
+    console.info('drop');
+  }
+
 </script>
 
 <style>
@@ -49,7 +66,15 @@
 
 </style>
 
-<div class="task" class:task-done={task.done}>
+<div 
+  data-index="{task.order}"
+  draggable="true"
+  on:dragstart={dragStart}
+  on:dragover={dragOver}
+  on:dragleave={dragLeave}
+  on:drop={drop}
+  class="task" 
+  class:task-done={task.done}>
   <input type="checkbox" bind:checked={task.done} />
   <TextField bind:value={task.description} bind:strikethrough={task.done} />
 </div>
