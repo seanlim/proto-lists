@@ -48,7 +48,6 @@
     overflow-y: hidden;
   }
   .list-wrapper {
-    padding: 15px;
     flex: 1;
     max-width: 400px;
     min-width: 300px;
@@ -108,7 +107,7 @@
 
 {#if loading}
   <span class="loading">
-    Loading...
+    ✏️ Loading...
   </span>
 {:else}
   <div class="list-container">
