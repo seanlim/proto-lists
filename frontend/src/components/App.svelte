@@ -2,13 +2,14 @@
   export let apiURL;
   import ApolloClient from 'apollo-boost';  
   import { setClient, subscribe, mutate } from 'svelte-apollo';
-	import { fly } from 'svelte/transition';
   import { LISTS } from '../queries';
   import { LIST_CREATE } from '../mutations';
   import { lists } from '../stores';
 
 
   import List from './List';
+
+  let isOver = false; // TODO: name this better
 
   // Create new Apollo client
   const client = new ApolloClient({ uri: apiURL });
@@ -36,6 +37,42 @@
     .then(({data}) => lists.update(l => ([...l, data.listCreate])))
     .catch(console.error);
   }
+
+  function reorderTasks({from, to}) {
+    console.info(from);
+    console.log('to');
+    console.info(to);
+  }
+  
+  // Recursively traverse up DOM to find task node with data
+  const getTaskData = (node) => node.dataset && node.dataset.id && node.dataset.listid ? 
+      node.dataset:
+      getTaskData(node.parentNode);
+
+  // Drag and drop delegate functions 
+  let dragStart = (e) => {
+    e.dataTransfer.setData('source', JSON.stringify(e.target.dataset));
+  };
+
+  let dragOver = (e) => {
+    e.preventDefault();
+    let node = getTaskData(e.target);
+    if (isOver !== node.id) isOver = node.id;
+  };
+
+  let dragLeave = (e) => {
+    let node = getTaskData(e.target);
+    if (isOver === node.id) isOver = false;
+  };
+  
+  let drop = (e) => {
+    e.preventDefault();
+    isOver = false;
+    let to = getTaskData(e.target);
+    let from = JSON.parse(e.dataTransfer.getData('source'));
+    reorderTasks({from, to});
+  };
+
 
 </script>
 
@@ -117,8 +154,14 @@
       </div>
     {:else}
       {#each $lists as list (list.id)}
-        <div class="list-wrapper" in:fly="{{y: -100, duration: 300, delay: list.order * 100}}">
-          <List list={list} />
+        <div class="list-wrapper">
+          <List 
+            list={list} 
+            bind:isOver={isOver}
+            bind:dragOver={dragOver}
+            bind:dragLeave={dragLeave}
+            bind:drop={drop}
+            bind:dragStart={dragStart} />
         </div>
       {/each}
     {/if}

@@ -1,9 +1,15 @@
 <script>
-  export let list;
   import { getClient, mutate } from 'svelte-apollo';
   import { LIST_UPDATE, TASK_CREATE } from '../mutations';
   import Task from './Task';
   import TextField from './TextField';
+
+  export let list,
+   isOver,
+   dragStart,
+   dragOver, 
+   dragLeave, 
+   drop;
 
   const client = getClient();
 
@@ -23,7 +29,7 @@
     .catch(console.error);
   }
 
-  function addTask(){
+  function addTask() {
     mutate(client, {
       mutation: TASK_CREATE,
       variables: {
@@ -45,7 +51,7 @@
   function resetNewTaskField() {
     newTaskDescription = '';
   }
-
+   
 </script>
 
 <style>
@@ -70,10 +76,16 @@
   <strong>
     <TextField bind:value={list.name} />
   </strong>
+  { isOver }
   {#each list.tasks as task}
     <!-- We don't bind task here because we don't want to trigger updates to the ENTIRE list when we edit tasks  -->
     <!-- TODO: Maybe try binding it BUT diffing in the reactive statement to prevent unecessary updates?    -->
-    <Task task={task} />
+    <Task 
+      task={task} 
+      bind:dragOver={dragOver}
+      bind:dragLeave={dragLeave}
+      bind:drop={drop}
+      bind:dragStart={dragStart} />
   {/each}
   <TextField bind:value={newTaskDescription} onSubmit={addTask} placeholder="&#x2607; Add task..." />
 </div>

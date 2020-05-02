@@ -1,10 +1,15 @@
 <script>
+  import { createEventDispatcher } from 'svelte';
   import { getClient, mutate } from 'svelte-apollo';
   import { TASK_UPDATE } from '../mutations';
 
   import TextField from './TextField';
 
-  export let task;
+  export let task, 
+   dragStart,
+   dragOver, 
+   dragLeave, 
+   drop;
 
   const client = getClient();
 
@@ -25,22 +30,6 @@
     .catch(console.error);
   }
 
-  // TODO: dragging and reordering tasks
-  function dragStart(e) {
-    console.info(e.target.dataset.index);
-  }
-
-  function dragOver(e) {
-    console.info('Drag over');
-  }
-
-  function dragLeave(e) {
-    console.info('Drag leave');
-  }
-  
-  function drop(e){
-    console.info('drop');
-  }
 
 </script>
 
@@ -67,7 +56,9 @@
 </style>
 
 <div 
-  data-index="{task.order}"
+  data-id={task.id}
+  data-order={task.order}
+  data-listid={task.listID}
   draggable="true"
   on:dragstart={dragStart}
   on:dragover={dragOver}
