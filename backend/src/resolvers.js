@@ -1,40 +1,52 @@
 const uuid = require('uuid').v4;
 
 const TASKS = 'tasks';
+const ROOT_NODE_ID = '0';
 const LISTS = 'lists';
 
 const Query = {
-  async lists(root, { id }, { db }) {
-    const lists = db.get(LISTS).value();
-    const tasks = db.get(TASKS).value();
-
-    return lists.map(l => ({
-      ...l,
-      tasks: !tasks ? []: tasks.filter(t => t.listID === l.id)
-    }));
+  async data(r, _, { db }) {
+    let data = db.getState();
+    data.lists = data.lists.filter(l => l.id !== ROOT_NODE_ID);
+    return data;
   },
 };
 const Mutation = {
-  async listCreate(root, { input }, { db }) {
-    const { name, order } = input;
+  async listCreate(r, { input }, { db }) {
+    const { name } = input;
 
     const newList = {
       id: uuid(),
-      order,
       name,
-      tasks: [],
+      root: null,
+      next: null,
     };
+
+    console.log(db.get(LISTS).size().value());
+
+    if (db.get(LISTS).size().value() === 1) {
+      db.get(LISTS)
+        .find({ id: ROOT_NODE_ID })
+        .assign({ next: newList.id })
+        .write();
+      console.log(db.getState());
+    } else {
+      db.get(LISTS)
+        .find({ next: null })
+        .assign({ next: newList.id })
+        .write();
+    }
 
     db.get(LISTS)
       .push(newList)
       .write();
 
-    console.info(`PUSH ${JSON.stringify(newList, null, 2)}`);
+    console.info(`Added List ${JSON.stringify(newList, null, 2)}`);
 
-    return newList;
+    return db.get(LISTS).value().filter(l => l.id !== ROOT_NODE_ID);
   },
-  async listUpdate(root, { input }, { db }) {
-    const { id, order, name } = input;
+  async listUpdate(r, { input }, { db }) {
+    const { id, name, root } = input;
 
     const list = db.get(LISTS).find({ id }).value();
     if (!list) return new Error('List does not exist');
@@ -43,20 +55,28 @@ const Mutation = {
       .find({ id })
       .assign({ 
         name, 
-        order 
+        root
       })
       .write();
 
     return db.get(LISTS).find({id}).value();
   },
-  async listDestroy(root, { id }, { db }) {
+  async listDestroy(r, { id }, { db }) {
     const list = db.get(LISTS).find({ id }).value();
     if (!list) return new Error('List does not exist');
 
+    // Update previous node to next
+    db.get(LISTS)
+      .find({ next: list.id })
+      .assign({ next: list.next })
+      .write();
+
+    // Remove list
     db.get(LISTS)
       .remove({id})
       .write();
 
+    // Remove all tasks associated to list
     db.get(TASKS)
       .remove({listID: id})
       .write();
@@ -65,27 +85,28 @@ const Mutation = {
 
     return true;
   },
-  async taskCreate(root, { input }, { db }) {
-    const { listID, order, description, date } = input;
+  async taskCreate(r, { input }, { db }) {
+    const { listID, description, date } = input;
 
     const newTask = {
       id: uuid(),
       listID,
-      order,
+      next: null,
       description,
       done: false,
       date,
     }
 
     db.get(TASKS)
-      .push(newTask).write();
+      .push(newTask)
+      .write();
 
     console.info(`PUSH ${JSON.stringify(newTask, null, 2)}`);
 
     return newTask;
   },
-  async taskUpdate(root, { input }, { db }) {
-    const { id, listID, order, description, done, date } = input
+  async taskUpdate(r, { input }, { db }) {
+    const { id, listID, next, description, done, date } = input
 
     const task = db.get(TASKS).find({ id }).value();
     if (!task) return new Error('Task does not exist');
@@ -99,7 +120,7 @@ const Mutation = {
 
     return db.get(TASKS).find({ id }).value();
   },
-  async taskDestroy(root, { id }, { db }) {
+  async taskDestroy(r, { id }, { db }) {
     const task = db.get(TASKS).find({id}).value();
     if (!task) return new Error('Task does not exist');
 

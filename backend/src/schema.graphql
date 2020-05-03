@@ -1,9 +1,9 @@
 type Query {
-  lists: [List]!
+  data: DataResponse!
 }
 
 type Mutation {
-  listCreate(input: ListCreateInput!): List!
+  listCreate(input: ListCreateInput!): [List]!
   listUpdate(input: ListUpdateInput!): List!
   listDestroy(id: ID!): Boolean!
 
@@ -12,42 +12,46 @@ type Mutation {
   taskDestroy(id: ID!): Boolean!
 }
 
-type List {
-  id: ID!
-  order: Int!
-  name: String!
+type DataResponse {
+  lists: [List]!
   tasks: [Task]!
 }
 
-type Task {
+interface LinkedListNode {
+  next: ID
+}
+
+type List implements LinkedListNode {
   id: ID!
+  next: ID
+  name: String!
+  root: ID
+}
+input ListCreateInput {
+  name: String!
+}
+input ListUpdateInput {
+  id: ID!
+  name: String!
+  root: ID
+}
+
+type Task implements LinkedListNode {
+  id: ID!
+  next: ID
   listID: ID!
-  order: Int!
   description: String!
   done: Boolean!
   date: String
 }
-
-input ListCreateInput {
-  name: String!
-  order: Int!
-}
-input ListUpdateInput {
-  id: ID!
-  order: Int!
-  name: String!
-}
-
 input TaskCreateInput {
   listID: ID!
-  order: Int! 
   description: String!
   date: String
 }
 input TaskUpdateInput {
   id: ID!
   listID: ID!
-  order: Int! 
   description: String!
   done: Boolean!
   date: String
