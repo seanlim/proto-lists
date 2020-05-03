@@ -202,7 +202,7 @@ const Mutation = {
         db.get(TASKS).find({ id: targetPrev.id }).assign({ next: source.id }).write();
       }
       // Point the source to the target
-      db.get(TASKS).find({ id: source.id }).assign({ next: target.id }).write();
+      db.get(TASKS).find({ id: source.id }).assign({ next: target.id, listID: target.listID }).write();
     } else {
       // Point the source node to the target's next node
       db.get(TASKS).find({ id: source.id }).assign({ next: target.next }).write();
