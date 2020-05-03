@@ -85,6 +85,7 @@ const Mutation = {
 
     return true;
   },
+
   async taskCreate(r, { input }, { db }) {
     const { listID, description, date } = input;
 
@@ -97,6 +98,24 @@ const Mutation = {
       date,
     }
 
+    const list = db.get(LISTS).find({ id: listID }).value();
+    if (!list) return new Error('List does not exist');
+
+    if (list.root === null) {
+      db.get(LISTS)
+        .find({ id: listID })
+        .assign({ root: newTask.id })
+        .write();
+    } else {
+      db.get(TASKS)
+      .find({ 
+        listID: listID,
+        next: null
+      })
+      .assign({ next: newTask.id })
+      .write();
+    }
+
     db.get(TASKS)
       .push(newTask)
       .write();
@@ -106,14 +125,18 @@ const Mutation = {
     return newTask;
   },
   async taskUpdate(r, { input }, { db }) {
-    const { id, listID, next, description, done, date } = input
+    const { id, description, done, date } = input
 
     const task = db.get(TASKS).find({ id }).value();
     if (!task) return new Error('Task does not exist');
 
     db.get(TASKS)
       .find({ id })
-      .assign({ ...input })
+      .assign({ 
+        description: input.description,
+        done: input.done,
+        date: input.date,
+      })
       .write();
 
     console.info(`UPDATE ${JSON.stringify(input, null, 2)}`);
@@ -123,6 +146,25 @@ const Mutation = {
   async taskDestroy(r, { id }, { db }) {
     const task = db.get(TASKS).find({id}).value();
     if (!task) return new Error('Task does not exist');
+    const list = db.get(LISTS).find({ id: task.listID }).value();
+    if (!list) return new Error('List does not exist');
+
+    // Update list if task is root node
+    if (list.root === task.id) {
+      db.get(LISTS)
+      .find({ id: list.id })
+      .assign({ root: task.next })
+      .write();
+    }
+    
+    // Update previous node to next
+    db.get(TASKS)
+      .find({
+        listID: task.listID,
+        next: task.id,
+      })
+      .assign({ next: task.next })
+      .write();
 
     db.get(TASKS)
       .remove({ id })
