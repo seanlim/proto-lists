@@ -1,14 +1,17 @@
 <script>
-  export let apiURL;
   import { onMount, onDestroy } from 'svelte';
   import ApolloClient from 'apollo-boost';  
   import { setClient, subscribe, mutate } from 'svelte-apollo';
+
+
+  import { buildOrderedList, searchList } from '../utils';
   import { DATA } from '../queries';
   import { LIST_CREATE } from '../mutations';
   import { lists, tasks } from '../stores';
 
   import List from './List';
 
+  export let apiURL;
   const ROOT_NODE_ID = '00000000-0000-0000-0000-000000000000';
   let unsubscribeLists;
   let loading = true; 
@@ -28,26 +31,12 @@
   })
   .catch(console.error);
 
-  const getList = (listID) => {
-    let list = null
-    for (let i = 0; i < $lists.length; i++) {
-      if ($lists[i].id === listID) {
-        list = $lists[i];
-        break;
-      }
-    }
-    return list;
-  };
+  const getList = (listID) => searchList(listID, $lists);
 
   function loadLists(lists) {
     const rootNode = getList(ROOT_NODE_ID);
     if (!rootNode || rootNode.next === null) return;
-    orderedLists = buildLists(getList(rootNode.next), []);
-  }
-
-  function buildLists(node, l) {
-    if (node.next === null) return [...l, node];
-    return buildLists(getList(node.next), [...l, node]);
+    orderedLists = buildOrderedList(getList(rootNode.next), getList);
   }
 
   async function addList() {

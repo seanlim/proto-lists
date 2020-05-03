@@ -1,6 +1,8 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { getClient, mutate } from 'svelte-apollo';
+
+  import { buildOrderedList, searchList } from '../utils';
   import { LIST_UPDATE, TASK_CREATE } from '../mutations';
   import { tasks } from '../stores';
   import Task from './Task';
@@ -32,26 +34,12 @@
     .catch(console.error);
   }
 
-  const getTask = (taskID, tasks = $tasks) => {
-    let task = null;
-    for (let i = 0; i < tasks.length; i++) {
-      if (tasks[i].id === taskID) {
-        task = tasks[i];
-        break;
-      } 
-    }
-    return task;
-  };
+  const getTask = (taskID, tasks = $tasks) => searchList(taskID, tasks);
 
   function loadTasks(tasks) {
     if (list.root === null || tasks.length === 0) return;
     const rootNode = getTask(list.root, tasks);
-    orderedTasks = buildTaskList(rootNode, []);
-  }
-
-  function buildTaskList(node, t) {
-    if (node.next === null) return [...t, node];
-    return buildTaskList(getTask(node.next), [...t, node])
+    orderedTasks = buildOrderedList(rootNode, getTask, []);
   }
 
   function addTask() {
