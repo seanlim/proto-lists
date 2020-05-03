@@ -1,5 +1,5 @@
 <script>
-  import { onDestroy } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { getClient, mutate } from 'svelte-apollo';
   import { LIST_UPDATE, TASK_CREATE } from '../mutations';
   import { tasks } from '../stores';
@@ -7,7 +7,8 @@
   import TextField from './TextField';
 
   export let list,
-   listTasks = [],
+   orderedTasks = [],
+   unsubsribeTasks,
    isOver,
    dragStart,
    dragOver, 
@@ -17,8 +18,6 @@
   const client = getClient();
 
   let newTaskDescription = '';
-
-  const unsubsribeTasks = tasks.subscribe(loadTasks);
 
   $: {
     mutate(client, {
@@ -33,8 +32,26 @@
     .catch(console.error);
   }
 
+  const getTask = (taskID, tasks = $tasks) => {
+    let task = null;
+    for (let i = 0; i < tasks.length; i++) {
+      if (tasks[i].id === taskID) {
+        task = tasks[i];
+        break;
+      } 
+    }
+    return task;
+  };
+
   function loadTasks(tasks) {
-    listTasks = tasks.filter(t => t.listID === list.id);
+    if (list.root === null || tasks.length === 0) return;
+    const rootNode = getTask(list.root, tasks);
+    orderedTasks = buildTaskList(rootNode, []);
+  }
+
+  function buildTaskList(node, t) {
+    if (node.next === null) return [...t, node];
+    return buildTaskList(getTask(node.next), [...t, node])
   }
 
   function addTask() {
@@ -49,7 +66,8 @@
       }
     })
     .then(({data}) => {
-      tasks.set(data.taskCreate);
+      if (list.root === null) list.root = data.taskCreate.taskCreateID;
+      tasks.set(data.taskCreate.tasks);
       resetNewTaskField();
     })
     .catch(console.error);
@@ -59,6 +77,9 @@
     newTaskDescription = '';
   }
 
+  onMount(()=> {
+    unsubsribeTasks = tasks.subscribe(loadTasks);
+  });
   onDestroy(unsubsribeTasks);
 
 </script>
@@ -86,7 +107,7 @@
     <TextField bind:value={list.name} />
   </strong>
   { isOver }
-  {#each listTasks as task}
+  {#each orderedTasks as task}
     <Task 
       task={task} 
       bind:dragOver={dragOver}

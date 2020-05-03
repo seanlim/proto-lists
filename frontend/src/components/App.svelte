@@ -1,22 +1,25 @@
 <script>
   export let apiURL;
+  import { onMount, onDestroy } from 'svelte';
   import ApolloClient from 'apollo-boost';  
   import { setClient, subscribe, mutate } from 'svelte-apollo';
   import { DATA } from '../queries';
   import { LIST_CREATE } from '../mutations';
   import { lists, tasks } from '../stores';
 
-
   import List from './List';
 
+  const ROOT_NODE_ID = '00000000-0000-0000-0000-000000000000';
+  let unsubscribeLists;
+  let loading = true; 
   let isOver = false; // TODO: name this better
+  let orderedLists = [];
 
   // Create new Apollo client
   const client = new ApolloClient({ uri: apiURL });
   setClient(client);
 
   // Fetch lists 
-  let loading = true; 
   const request = subscribe(client, { query: DATA });
   $request.then(({ data }) => {
     lists.set(data.data.lists);
@@ -24,6 +27,28 @@
     loading = false;
   })
   .catch(console.error);
+
+  const getList = (listID) => {
+    let list = null
+    for (let i = 0; i < $lists.length; i++) {
+      if ($lists[i].id === listID) {
+        list = $lists[i];
+        break;
+      }
+    }
+    return list;
+  };
+
+  function loadLists(lists) {
+    const rootNode = getList(ROOT_NODE_ID);
+    if (!rootNode || rootNode.next === null) return;
+    orderedLists = buildLists(getList(rootNode.next), []);
+  }
+
+  function buildLists(node, l) {
+    if (node.next === null) return [...l, node];
+    return buildLists(getList(node.next), [...l, node]);
+  }
 
   async function addList() {
     mutate(client, {
@@ -71,6 +96,11 @@
     if (from.id !== to.id) reorderTasks({from, to});
   };
 
+  onMount(() => {
+    unsubscribeLists = lists.subscribe(loadLists)
+  });
+
+  onDestroy(unsubscribeLists);
 
 </script>
 
@@ -146,15 +176,15 @@
   </span>
 {:else}
   <div class="list-container">
-    {#if $lists.length < 1}
+    {#if orderedLists.length < 1}
       <div class="no-list">
         <p>No Lists</p>
       </div>
     {:else}
-      {#each $lists as list (list.id)}
+      {#each orderedLists as list (list.id)}
         <div class="list-wrapper">
           <List 
-            bind:list={list} 
+            list={list} 
             bind:isOver={isOver}
             bind:dragOver={dragOver}
             bind:dragLeave={dragLeave}

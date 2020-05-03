@@ -6,9 +6,7 @@ const LISTS = 'lists';
 
 const Query = {
   async data(r, _, { db }) {
-    let data = db.getState();
-    data.lists = data.lists.filter(l => l.id !== ROOT_NODE_ID);
-    return data;
+    return db.getState();
   },
 };
 const Mutation = {
@@ -24,7 +22,11 @@ const Mutation = {
 
     // BAD: weird issue where lowdb does not recognise the root node I've manually inserted...
     const rootNode = () => db.get(LISTS).find({ id: ROOT_NODE_ID }).value();
-    if (!rootNode()) db.get(LISTS).push({id: ROOT_NODE_ID, next: null}).write();
+    if (!rootNode()) db.get(LISTS).push({
+      id: ROOT_NODE_ID, 
+      next: null,
+      name: "root"
+    }).write();
 
     if (rootNode().next === null) {
       db.get(LISTS)
@@ -44,7 +46,7 @@ const Mutation = {
 
     console.info(`Added List ${JSON.stringify(newList, null, 2)}`);
 
-    return db.get(LISTS).value().filter(l => l.id !== ROOT_NODE_ID);
+    return db.get(LISTS).value();
   },
   async listUpdate(r, { input }, { db }) {
     const { id, name } = input;
@@ -122,7 +124,10 @@ const Mutation = {
 
     console.info(`PUSH ${JSON.stringify(newTask, null, 2)}`);
 
-    return db.get(TASKS).value();
+    return {
+      tasks: db.get(TASKS).value(),
+      taskCreateID: newTask.id,
+    };
   },
   async taskUpdate(r, { input }, { db }) {
     const { id, description, done, date } = input

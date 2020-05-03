@@ -6,6 +6,7 @@ export const LIST_CREATE = gql`
       id,
       next,
       name,
+      root,
     }
   }
 `;
@@ -16,6 +17,7 @@ export const LIST_UPDATE = gql`
       id,
       next,
       name,
+      root,
     }
   }
 `;
@@ -29,12 +31,15 @@ export const LIST_DESTORY = gql`
 export const TASK_CREATE = gql`
   mutation ($input: TaskCreateInput!){
     taskCreate(input: $input) {
-      id
-      next
-      listID
-      description
-      done
-      date
+      taskCreateID
+      tasks {
+        id
+        next
+        listID
+        description
+        done
+        date
+      }
     }
   }
 `;
