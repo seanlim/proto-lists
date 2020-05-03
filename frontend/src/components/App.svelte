@@ -2,9 +2,9 @@
   export let apiURL;
   import ApolloClient from 'apollo-boost';  
   import { setClient, subscribe, mutate } from 'svelte-apollo';
-  import { LISTS } from '../queries';
+  import { DATA } from '../queries';
   import { LIST_CREATE } from '../mutations';
-  import { lists } from '../stores';
+  import { lists, tasks } from '../stores';
 
 
   import List from './List';
@@ -17,9 +17,10 @@
 
   // Fetch lists 
   let loading = true; 
-  const request = subscribe(client, { query: LISTS });
-  $request.then(res => {
-    lists.set(res.data.lists);
+  const request = subscribe(client, { query: DATA });
+  $request.then(({ data }) => {
+    lists.set(data.data.lists);
+    tasks.set(data.data.tasks);
     loading = false;
   })
   .catch(console.error);
@@ -30,18 +31,15 @@
       variables: {
         input: {
           name : 'new list',
-          order: $lists.length
         }
       }
     })
-    .then(({data}) => lists.update(l => ([...l, data.listCreate])))
+    .then(({data}) => lists.set(data.listCreate))
     .catch(console.error);
   }
 
+
   function reorderTasks({from, to}) {
-    console.info(from);
-    console.log('to');
-    console.info(to);
   }
   
   // Recursively traverse up DOM to find task node with data
@@ -70,7 +68,7 @@
     isOver = false;
     let to = getTaskData(e.target);
     let from = JSON.parse(e.dataTransfer.getData('source'));
-    reorderTasks({from, to});
+    if (from.id !== to.id) reorderTasks({from, to});
   };
 
 
@@ -156,7 +154,7 @@
       {#each $lists as list (list.id)}
         <div class="list-wrapper">
           <List 
-            list={list} 
+            bind:list={list} 
             bind:isOver={isOver}
             bind:dragOver={dragOver}
             bind:dragLeave={dragLeave}

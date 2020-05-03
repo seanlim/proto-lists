@@ -19,8 +19,6 @@
       variables: {
         input: {
           id: task.id,
-          listID: task.listID,
-          order: task.order,
           description: task.description,
           done: task.done,
           date: task.date,
@@ -57,8 +55,11 @@
 
 <div 
   data-id={task.id}
-  data-order={task.order}
+  data-next={task.next}
   data-listid={task.listID}
+  data-description={task.description} 
+  data-done={task.done}
+  data-date={task.date}
   draggable="true"
   on:dragstart={dragStart}
   on:dragover={dragOver}

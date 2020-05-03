@@ -1,12 +1,15 @@
 import { writable } from 'svelte/store'; 
 
-const createListStore = () => {
-  const {subscribe, set, update} = writable({});
+function sortOrder(a, b) {
+  return (a.order > b.order) ? 1: -1;
+}
+function sortTasks(list) {
+  let newTasks = list.tasks.sort(sortOrder);
   return {
-    subscribe,
-    update,
-    set: newLists => set(newLists.sort((a, b) => (a.order > b.order) ? 1: -1)),
+    ...list,
+    task: newTasks
   };
-};
+}
 
-export const lists = createListStore();
+export const lists = writable([]);
+export const tasks = writable([]);

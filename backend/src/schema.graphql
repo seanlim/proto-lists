@@ -7,7 +7,7 @@ type Mutation {
   listUpdate(input: ListUpdateInput!): List!
   listDestroy(id: ID!): Boolean!
 
-  taskCreate(input: TaskCreateInput!): Task
+  taskCreate(input: TaskCreateInput!): [Task]!
   taskUpdate(input: TaskUpdateInput!): Task!
   taskDestroy(id: ID!): Boolean!
 }
@@ -51,7 +51,6 @@ input TaskCreateInput {
 }
 input TaskUpdateInput {
   id: ID!
-  listID: ID!
   description: String!
   done: Boolean!
   date: String

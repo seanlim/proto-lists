@@ -4,16 +4,8 @@ export const LIST_CREATE = gql`
   mutation ($input: ListCreateInput!) {
     listCreate(input: $input){
       id,
+      next,
       name,
-      order,
-      tasks {
-        id
-        listID
-        order
-        description
-        done
-        date
-      },
     }
   }
 `;
@@ -22,16 +14,8 @@ export const LIST_UPDATE = gql`
   mutation ($input: ListUpdateInput!) {
     listUpdate (input: $input){
       id,
+      next,
       name,
-      order,
-      tasks {
-        id
-        listID
-        order
-        description
-        done
-        date
-      },
     }
   }
 `;
@@ -46,8 +30,8 @@ export const TASK_CREATE = gql`
   mutation ($input: TaskCreateInput!){
     taskCreate(input: $input) {
       id
+      next
       listID
-      order
       description
       done
       date
@@ -59,8 +43,8 @@ export const TASK_UPDATE = gql`
   mutation ($input: TaskUpdateInput!){
     taskUpdate(input: $input) {
       id
+      next
       listID
-      order
       description
       done
       date

@@ -1,15 +1,18 @@
 import { gql } from 'apollo-boost';
 
-export const LISTS = gql`
+export const DATA = gql`
   {
-    lists {
-      id
-      name
-      order
+    data {
+      lists {
+        id
+        next
+        root
+        name
+      }
       tasks {
         id
+        next
         listID
-        order
         description
         done
         date

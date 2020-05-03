@@ -1,7 +1,7 @@
 const uuid = require('uuid').v4;
 
 const TASKS = 'tasks';
-const ROOT_NODE_ID = '0';
+const ROOT_NODE_ID = '00000000-0000-0000-0000-000000000000';
 const LISTS = 'lists';
 
 const Query = {
@@ -22,14 +22,15 @@ const Mutation = {
       next: null,
     };
 
-    console.log(db.get(LISTS).size().value());
+    // BAD: weird issue where lowdb does not recognise the root node I've manually inserted...
+    const rootNode = () => db.get(LISTS).find({ id: ROOT_NODE_ID }).value();
+    if (!rootNode()) db.get(LISTS).push({id: ROOT_NODE_ID, next: null}).write();
 
-    if (db.get(LISTS).size().value() === 1) {
+    if (rootNode().next === null) {
       db.get(LISTS)
         .find({ id: ROOT_NODE_ID })
         .assign({ next: newList.id })
         .write();
-      console.log(db.getState());
     } else {
       db.get(LISTS)
         .find({ next: null })
@@ -46,7 +47,7 @@ const Mutation = {
     return db.get(LISTS).value().filter(l => l.id !== ROOT_NODE_ID);
   },
   async listUpdate(r, { input }, { db }) {
-    const { id, name, root } = input;
+    const { id, name } = input;
 
     const list = db.get(LISTS).find({ id }).value();
     if (!list) return new Error('List does not exist');
@@ -55,7 +56,6 @@ const Mutation = {
       .find({ id })
       .assign({ 
         name, 
-        root
       })
       .write();
 
@@ -63,7 +63,7 @@ const Mutation = {
   },
   async listDestroy(r, { id }, { db }) {
     const list = db.get(LISTS).find({ id }).value();
-    if (!list) return new Error('List does not exist');
+    if (!list || id === ROOT_NODE_ID) return new Error('List does not exist');
 
     // Update previous node to next
     db.get(LISTS)
@@ -122,7 +122,7 @@ const Mutation = {
 
     console.info(`PUSH ${JSON.stringify(newTask, null, 2)}`);
 
-    return newTask;
+    return db.get(TASKS).value();
   },
   async taskUpdate(r, { input }, { db }) {
     const { id, description, done, date } = input

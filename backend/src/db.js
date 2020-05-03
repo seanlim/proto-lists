@@ -9,16 +9,4 @@ db.defaults({
   tasks: [],
 }).write();
 
-// Create root list node
-if (db.get('lists').size().value() === 0) {
-  db.get('lists')
-    .push({
-      id: '0',
-      name: null,
-      root: null,
-      next: null
-    })
-    .write();
-}
-
 module.exports = db;

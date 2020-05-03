@@ -1,10 +1,13 @@
 <script>
+  import { onDestroy } from 'svelte';
   import { getClient, mutate } from 'svelte-apollo';
   import { LIST_UPDATE, TASK_CREATE } from '../mutations';
+  import { tasks } from '../stores';
   import Task from './Task';
   import TextField from './TextField';
 
   export let list,
+   listTasks = [],
    isOver,
    dragStart,
    dragOver, 
@@ -15,18 +18,23 @@
 
   let newTaskDescription = '';
 
+  const unsubsribeTasks = tasks.subscribe(loadTasks);
+
   $: {
     mutate(client, {
       mutation: LIST_UPDATE,
       variables: {
         input: {
           id: list.id,
-          order: list.order,
           name: list.name.toString(),
         }
       }
     })
     .catch(console.error);
+  }
+
+  function loadTasks(tasks) {
+    listTasks = tasks.filter(t => t.listID === list.id);
   }
 
   function addTask() {
@@ -35,14 +43,13 @@
       variables: {
         input: {
           listID: list.id,
-          order: list.tasks.length,
           description: newTaskDescription,
-          date: '' // TODO: Add date for task
+          date: '' // TODO: Add date for task;
         }
       }
     })
     .then(({data}) => {
-      list.tasks = [...list.tasks, data.taskCreate];
+      tasks.set(data.taskCreate);
       resetNewTaskField();
     })
     .catch(console.error);
@@ -51,7 +58,9 @@
   function resetNewTaskField() {
     newTaskDescription = '';
   }
-   
+
+  onDestroy(unsubsribeTasks);
+
 </script>
 
 <style>
@@ -77,9 +86,7 @@
     <TextField bind:value={list.name} />
   </strong>
   { isOver }
-  {#each list.tasks as task}
-    <!-- We don't bind task here because we don't want to trigger updates to the ENTIRE list when we edit tasks  -->
-    <!-- TODO: Maybe try binding it BUT diffing in the reactive statement to prevent unecessary updates?    -->
+  {#each listTasks as task}
     <Task 
       task={task} 
       bind:dragOver={dragOver}
