@@ -10,6 +10,7 @@ type Mutation {
   taskCreate(input: TaskCreateInput!): TaskCreateResponse!
   taskUpdate(input: TaskUpdateInput!): Task!
   taskDestroy(id: ID!): Boolean!
+  taskReorder(input: TaskReorderInput!): DataResponse!
 }
 
 type DataResponse {
@@ -58,4 +59,8 @@ input TaskUpdateInput {
   description: String!
   done: Boolean!
   date: String
+}
+input TaskReorderInput {
+  fromID: ID!
+  toID: ID!
 }

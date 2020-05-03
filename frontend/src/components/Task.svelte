@@ -28,7 +28,6 @@
     .catch(console.error);
   }
 
-
 </script>
 
 <style>

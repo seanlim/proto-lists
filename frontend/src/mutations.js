@@ -62,3 +62,24 @@ export const TASK_DESTROY = gql`
     taskDestroy(id: $input)
   }
 `;
+
+export const TASK_REORDER = gql`
+  mutation ($input: TaskReorderInput!) {
+    taskReorder(input: $input) {
+      lists {
+        id
+        next
+        root
+        name
+      }
+      tasks {
+        id
+        next
+        listID
+        description
+        done
+        date
+      }
+    }
+  }
+`;

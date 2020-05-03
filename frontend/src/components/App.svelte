@@ -6,7 +6,7 @@
 
   import { buildOrderedList, searchList } from '../utils';
   import { DATA } from '../queries';
-  import { LIST_CREATE } from '../mutations';
+  import { LIST_CREATE, TASK_REORDER } from '../mutations';
   import { lists, tasks } from '../stores';
 
   import List from './List';
@@ -52,8 +52,21 @@
     .catch(console.error);
   }
 
-
-  function reorderTasks({from, to}) {
+  async function reorderTasks({from, to}) {
+    mutate(client, {
+      mutation: TASK_REORDER,
+      variables: {
+        input: {
+          fromID: from.id,
+          toID: to.id
+        }
+      }
+    })
+    .then(({data}) => {
+      lists.set(data.taskReorder.lists);
+      tasks.set(data.taskReorder.tasks);
+    })
+    .catch(console.error);
   }
   
   // Recursively traverse up DOM to find task node with data

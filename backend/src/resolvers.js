@@ -179,6 +179,46 @@ const Mutation = {
 
     return true;
   },
+  async taskReorder(r, { input }, { db }) {
+    const { fromID, toID } = input;
+    const source = db.get(TASKS).find({id: fromID}).value();
+    const target = db.get(TASKS).find({id: toID}).value();
+    const sourcePrev = db.get(TASKS).find({next: source.id}).value();
+    const targetPrev = db.get(TASKS).find({next: target.id}).value();
+
+    if (target.id !== source.next) {
+      if (sourcePrev === undefined) {
+        // Update the source list's root node to the source's next node
+        db.get(LISTS).find({ id: source.listID }).assign({ root: source.next }).write();
+      } else {
+        // Point the source's previous node to the source's next node
+        db.get(TASKS).find({ id: sourcePrev.id }).assign({ next: source.next }).write();
+      }
+      if (targetPrev === undefined) {
+        // Update the target list's root node to the source node
+        db.get(LISTS).find({ id: target.listID }).assign({ root: source.id }).write();
+      } else {
+        // Point the target's previous node to the source node
+        db.get(TASKS).find({ id: targetPrev.id }).assign({ next: source.id }).write();
+      }
+      // Point the source to the target
+      db.get(TASKS).find({ id: source.id }).assign({ next: target.id }).write();
+    } else {
+      // Point the source node to the target's next node
+      db.get(TASKS).find({ id: source.id }).assign({ next: target.next }).write();
+      // Point the target node to the source node
+      db.get(TASKS).find({ id: target.id }).assign({ next: source.id }).write();
+      if (sourcePrev === undefined){
+        // Update the source list's root node to the target node
+        db.get(LISTS).find({ id: source.listID }).assign({ root: target.id }).write();
+      } else {
+        // Point the source's previous node to the target node
+        db.get(TASKS).find({ id: sourcePrev.id }).assign({ next: target.id }).write();
+      }
+    }
+
+    return db.getState();
+  },
 };
 
 module.exports = {
