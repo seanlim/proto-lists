@@ -22,6 +22,7 @@
   let newTaskDescription = '';
 
   $: {
+    // Sync list name
     mutate(client, {
       mutation: LIST_UPDATE,
       variables: {
@@ -32,6 +33,8 @@
       }
     })
     .catch(console.error);
+    // Load tasks
+    loadTasks($tasks);
   }
 
   const getTask = (taskID, tasks = $tasks) => searchList(taskID, tasks);
@@ -66,6 +69,7 @@
   }
 
   onMount(()=> {
+    // Load tasks on tasks change
     unsubsribeTasks = tasks.subscribe(loadTasks);
   });
   onDestroy(unsubsribeTasks);
@@ -94,7 +98,6 @@
   <strong>
     <TextField bind:value={list.name} />
   </strong>
-  { isOver }
   {#each orderedTasks as task}
     <Task 
       task={task} 

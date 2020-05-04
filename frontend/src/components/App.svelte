@@ -186,7 +186,7 @@
       {#each orderedLists as list (list.id)}
         <div class="list-wrapper">
           <List 
-            list={list} 
+            bind:list={list} 
             bind:isOver={isOver}
             bind:dragOver={dragOver}
             bind:dragLeave={dragLeave}
