@@ -101,6 +101,7 @@
   {#each orderedTasks as task}
     <Task 
       task={task} 
+      bind:isOver={isOver}
       bind:dragOver={dragOver}
       bind:dragLeave={dragLeave}
       bind:drop={drop}

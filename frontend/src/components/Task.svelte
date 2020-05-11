@@ -6,6 +6,7 @@
   import TextField from './TextField';
 
   export let task, 
+   isOver, 
    dragStart,
    dragOver, 
    dragLeave, 
@@ -35,6 +36,16 @@
     display: flex;
     flex-direction: row;
     margin-bottom: var(--list-padding);
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+  }
+
+  .top-highlight {
+    border-top: 1px solid var(--foreground);
+  }
+
+  .bottom-highlight {
+    border-bottom: 1px solid var(--foreground);
   }
 
   .task-done {
@@ -65,6 +76,7 @@
   on:dragleave={dragLeave}
   on:drop={drop}
   class="task" 
+  class:top-highlight={isOver === task.id}
   class:task-done={task.done}>
   <input type="checkbox" bind:checked={task.done} />
   <TextField bind:value={task.description} bind:strikethrough={task.done} />
