@@ -1,26 +1,27 @@
 const uuid = require('uuid').v4;
 const { TASKS, ROOT_NODE_ID, LISTS } = require('./constants');
+const { sortLinkedList } = require('./sort');
 
-// helpers
+// database factored functions
 const findInCollection = (id , db, collection) => db.get(collection).find({ id });
 
-// TODO: major re-writing required to match updated schema
 const Query = {
   async lists (r, _, { db }) {
-    return db.get(LISTS).value().map(l => ({
+    const sortedLists = sortLinkedList(db.get(LISTS).value(), ROOT_NODE_ID, false);
+    return sortedLists.map(l => ({
       ...l,
-      tasks: db.get(TASKS)
+      tasks: sortLinkedList(db.get(TASKS)
         .filter({listID : l.id})
-        .value(),
+        .value(), l.root, true),
     }));
   },
   async list(r, { id }, { db }) {
-    return {
+    return ({
       ...findInCollection(id, db, LISTS).value(),
-      tasks: db.get(TASKS)
-        .where({listID : id})
-        .value(),
-    };
+      tasks: sortLinkedList(db.get(TASKS)
+        .filter({listID : l.id})
+        .value(), l.root, true),
+    });
   },
   async task(r, { id }, { db }) {
     return findInCollection(id, db, TASKS).value();

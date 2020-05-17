@@ -1,3 +1,4 @@
+// TODO: move this to the server side
 export const searchList = (id, items)  => {
   let item = null;
   for (let i = 0; i < items.length; i++) {
