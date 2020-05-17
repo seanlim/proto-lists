@@ -4,9 +4,9 @@
   import { setClient, subscribe, mutate } from 'svelte-apollo';
 
   import { buildOrderedList, searchList } from '../utils';
-  import { DATA } from '../queries';
+  import { LISTS } from '../queries';
   import { LIST_CREATE, TASK_REORDER } from '../mutations';
-  import { lists, tasks } from '../stores';
+  import { lists } from '../stores';
 
   import List from './List';
 
@@ -19,11 +19,11 @@
   const client = new ApolloClient({ uri: apiURL });
   setClient(client);
 
-  // Fetch data
-  const request = subscribe(client, { query: DATA });
+  // Fetch lists 
+  const request = subscribe(client, { query: LISTS });
   $request.then(({ data }) => {
-    lists.set(data.data.lists);
-    tasks.set(data.data.tasks);
+    console.info(data);
+    lists.set(data.lists);
     loading = false;
   })
   .catch(console.error);
@@ -54,7 +54,6 @@
     })
     .then(({data}) => {
       lists.set(data.taskReorder.lists);
-      tasks.set(data.taskReorder.tasks);
     })
     .catch(console.error);
   }
@@ -91,7 +90,6 @@
   function onTaskCreated(event) {
     console.info(event);
     const newTask = event.detail.payload;
-    tasks.update(t => [...t, newTask]);
     if ($lists.filter(l => l.id === newTask.listID)[0].root === null) {
       lists.update(ls => ls.map(l => l.id === newTask.listID 
       ? ({ ...l, root: newTask.id })
@@ -100,6 +98,36 @@
   }
 
 </script>
+
+{#if loading}
+  <span class="loading">
+    ✏️ Loading...
+  </span>
+{:else}
+  <div class="list-container">
+    {#if $lists.length < 1}
+      <div class="no-list">
+        <p>No Lists</p>
+      </div>
+    {:else}
+      {#each $lists as list (list.id)}
+        <div class="list-wrapper">
+          <List 
+            on:createTask={onTaskCreated}
+            bind:list={list} 
+            bind:isOver={isOver}
+            bind:dragOver={dragOver}
+            bind:dragLeave={dragLeave}
+            bind:drop={drop}
+            bind:dragStart={dragStart} />
+        </div>
+      {/each}
+    {/if}
+    <div class="add-list" on:click={addList}>
+      <b>+</b>
+    </div>
+  </div>
+{/if}
 
 <style>
   .list-container {
@@ -166,35 +194,3 @@
   }
 
 </style>
-
-{#if loading}
-  <span class="loading">
-    ✏️ Loading...
-  </span>
-{:else}
-  <div class="list-container">
-    {#if $lists.length < 1}
-      <div class="no-list">
-        <p>No Lists</p>
-      </div>
-    {:else}
-      {#each $lists as list (list.id)}
-        <div class="list-wrapper">
-          <List 
-            on:createTask={onTaskCreated}
-            bind:list={list} 
-            bind:isOver={isOver}
-            bind:dragOver={dragOver}
-            bind:dragLeave={dragLeave}
-            bind:drop={drop}
-            bind:dragStart={dragStart} />
-        </div>
-      {/each}
-    {/if}
-    <div class="add-list" on:click={addList}>
-      <b>+</b>
-    </div>
-  </div>
-{/if}
-
-

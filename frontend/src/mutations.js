@@ -3,10 +3,8 @@ import { gql } from 'apollo-boost';
 export const LIST_CREATE = gql`
   mutation ($input: ListCreateInput!) {
     listCreate(input: $input){
-      id,
-      next,
-      name,
-      root,
+      id
+      name
     }
   }
 `;
@@ -14,10 +12,8 @@ export const LIST_CREATE = gql`
 export const LIST_UPDATE = gql`
   mutation ($input: ListUpdateInput!) {
     listUpdate (input: $input){
-      id,
-      next,
-      name,
-      root,
+      id
+      name
     }
   }
 `;
@@ -32,7 +28,6 @@ export const TASK_CREATE = gql`
   mutation ($input: TaskCreateInput!){
     newTask: taskCreate(input: $input) {
       id
-      next
       listID
       description
       done
@@ -45,7 +40,6 @@ export const TASK_UPDATE = gql`
   mutation ($input: TaskUpdateInput!){
     taskUpdate(input: $input) {
       id
-      next
       listID
       description
       done
@@ -59,13 +53,10 @@ export const TASK_DESTROY = gql`
     taskDestroy(id: $input) {
       list {
         id
-        next
-        root
         name
       }
       tasks {
         id
-        next
         listID
         description
         done
@@ -80,13 +71,10 @@ export const TASK_REORDER = gql`
     taskReorder(input: $input) {
       lists {
         id
-        next
-        root
         name
       }
       tasks {
         id
-        next
         listID
         description
         done

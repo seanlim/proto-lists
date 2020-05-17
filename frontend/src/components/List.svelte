@@ -2,7 +2,6 @@
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import { getClient, mutate } from 'svelte-apollo';
 
-  import { tasks } from '../stores';
   import { buildOrderedList, searchList } from '../utils';
   import { LIST_UPDATE, TASK_CREATE } from '../mutations';
   import Task from './Task';
@@ -19,12 +18,6 @@
   const client = getClient();
 
   let newTaskDescription = '';
-
-  $: listTasks =  (() => {
-    if (list.root === null) return [];
-    const lt = $tasks.filter(t => t.listID === list.id);
-    return buildOrderedList(searchList(list.root, lt), (_id) => searchList(_id, lt));
-  })();
 
   let updateList = () => {
     mutate(client, {
@@ -65,6 +58,22 @@
 
 </script>
 
+<div class="list-content">
+  <strong>
+    <TextField bind:onEdit={updateList} bind:value={list.name} />
+  </strong>
+  {#each list.tasks as task}
+    <Task 
+      task={task} 
+      bind:isOver={isOver}
+      bind:dragOver={dragOver}
+      bind:dragLeave={dragLeave}
+      bind:drop={drop}
+      bind:dragStart={dragStart} />
+  {/each}
+  <TextField bind:value={newTaskDescription} onSubmit={addTask} placeholder="&#x2607; Add task..." />
+</div>
+
 <style>
   .list-content {
     padding: 15px;
@@ -82,20 +91,3 @@
     font-weight: bold;
   }
 </style>
-
-<div class="list-content">
-  <strong>
-    <TextField bind:onEdit={updateList} bind:value={list.name} />
-  </strong>
-  {#each listTasks as task}
-    <Task 
-      task={task} 
-      bind:isOver={isOver}
-      bind:dragOver={dragOver}
-      bind:dragLeave={dragLeave}
-      bind:drop={drop}
-      bind:dragStart={dragStart} />
-  {/each}
-  <TextField bind:value={newTaskDescription} onSubmit={addTask} placeholder="&#x2607; Add task..." />
-</div>
-

@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { getClient, mutate } from 'svelte-apollo';
   import { TASK_UPDATE, TASK_DESTROY } from '../mutations';
-  import { tasks, lists } from '../stores';
+  import { lists } from '../stores';
   import { searchList } from '../utils';
 
   import TextField from './TextField';
@@ -39,18 +39,33 @@
       },
     })
     .then((res) => {
-      const newList = res.data.taskDestroy.list;
-      const newTasks = res.data.taskDestroy.tasks;
-
-      lists.update(ls => ls.map(l => l.id === newList.id ? newList: l));
-      tasks.update(ts => ts
-        .filter(t => t.id !== task.id)
-        .map(t => t.listID === newList.id ? searchList(t.id, newTasks): t));
     })
     .catch(console.error);
   };
 
 </script>
+
+<div 
+  data-id={task.id}
+  data-listid={task.listID}
+  data-description={task.description} 
+  data-done={task.done}
+  data-date={task.date}
+  draggable="true"
+  on:dragstart={dragStart}
+  on:dragover={dragOver}
+  on:dragleave={dragLeave}
+  on:drop={drop}
+  class="task" 
+  class:top-highlight={isOver === task.id}
+  class:dragging={isOver !== false}
+  class:task-done={task.done}>
+  <input type="checkbox" bind:checked={task.done} />
+  <TextField 
+    bind:onDelete={deleteTask}
+    bind:value={task.description} 
+    bind:strikethrough={task.done} />
+</div>
 
 <style>
   .task {
@@ -91,27 +106,4 @@
   }
 
 </style>
-
-<div 
-  data-id={task.id}
-  data-next={task.next}
-  data-listid={task.listID}
-  data-description={task.description} 
-  data-done={task.done}
-  data-date={task.date}
-  draggable="true"
-  on:dragstart={dragStart}
-  on:dragover={dragOver}
-  on:dragleave={dragLeave}
-  on:drop={drop}
-  class="task" 
-  class:top-highlight={isOver === task.id}
-  class:dragging={isOver !== false}
-  class:task-done={task.done}>
-  <input type="checkbox" bind:checked={task.done} />
-  <TextField 
-    bind:onDelete={deleteTask}
-    bind:value={task.description} 
-    bind:strikethrough={task.done} />
-</div>
 

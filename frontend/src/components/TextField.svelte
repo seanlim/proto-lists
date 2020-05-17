@@ -17,7 +17,7 @@
       return;
     }
 
-    onEdit();
+    onEdit && onEdit();
   }
 </script>
 

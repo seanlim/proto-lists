@@ -68,7 +68,10 @@ const Mutation = {
 
     console.info(`Added List ${JSON.stringify(newList, null, 2)}`);
 
-    return db.get(LISTS).value();
+    return ({
+      ...findInCollection(newList.id, db, LISTS).value(),
+      tasks: [],
+    });
   },
   async listUpdate(r, { input }, { db }) {
     const { id, name } = input;
@@ -198,6 +201,7 @@ const Mutation = {
 
     return true;
   },
+  // TODO: implement reorder for lists and tasks
   async reorder(r, { input }, { db }) {
     const { fromID, toID } = input;
     const source = db.get(TASKS).find({id: fromID}).value();
