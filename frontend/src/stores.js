@@ -1,15 +1,24 @@
 import { writable } from 'svelte/store'; 
+import { searchList, buildOrderedList } from './utils';
+import { ROOT_NODE_ID } from './constants';
 
-function sortOrder(a, b) {
-  return (a.order > b.order) ? 1: -1;
-}
-function sortTasks(list) {
-  let newTasks = list.tasks.sort(sortOrder);
+const createdLinkedListStore = () => {
+  const {subscribe, set, update} = writable([]);
+
   return {
-    ...list,
-    task: newTasks
-  };
-}
+    subscribe,
+    set: (newList, rootNode = null) => set(
+      buildOrderedList(
+        searchList(rootNode === null 
+          ? ROOT_NODE_ID
+          : rootNode, newList),
+        ((id) => searchList(id, newList))
+      )
+    ),
+    unset: () => set(null),
+    update,
+  }
+};
 
-export const lists = writable([]);
+export const lists = createdLinkedListStore();
 export const tasks = writable([]);

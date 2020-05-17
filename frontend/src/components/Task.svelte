@@ -1,7 +1,9 @@
 <script>
   import { createEventDispatcher } from 'svelte';
   import { getClient, mutate } from 'svelte-apollo';
-  import { TASK_UPDATE } from '../mutations';
+  import { TASK_UPDATE, TASK_DESTROY } from '../mutations';
+  import { tasks, lists } from '../stores';
+  import { searchList } from '../utils';
 
   import TextField from './TextField';
 
@@ -29,23 +31,45 @@
     .catch(console.error);
   }
 
+  let deleteTask = () => {
+    mutate(client, {
+      mutation: TASK_DESTROY,
+      variables: {
+        input: task.id,
+      },
+    })
+    .then((res) => {
+      const newList = res.data.taskDestroy.list;
+      const newTasks = res.data.taskDestroy.tasks;
+
+      lists.update(ls => ls.map(l => l.id === newList.id ? newList: l));
+      tasks.update(ts => ts
+        .filter(t => t.id !== task.id)
+        .map(t => t.listID === newList.id ? searchList(t.id, newTasks): t));
+    })
+    .catch(console.error);
+  };
+
 </script>
 
 <style>
   .task {
+    padding: 0 0.5rem;
+    border-radius: 5px;
     display: flex;
     flex-direction: row;
     margin-bottom: var(--list-padding);
-    border-top: 1px solid transparent;
-    border-bottom: 1px solid transparent;
+    border-top: 2px solid transparent;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
   }
 
   .top-highlight {
-    border-top: 1px solid var(--foreground);
+    border-top: 2px solid var(--accent);
   }
 
   .bottom-highlight {
-    border-bottom: 1px solid var(--foreground);
+    border-bottom: 2px solid var(--accent);
   }
 
   .task-done {
@@ -53,12 +77,17 @@
   }
 
   .task:hover {
+    background: var(--highlight);
     opacity: 1;
   }
 
   input[type=checkbox] {
     margin-top: 10px;
     margin-right: 10px;
+  }
+
+  .dragging {
+    cursor: grabbing;
   }
 
 </style>
@@ -77,8 +106,12 @@
   on:drop={drop}
   class="task" 
   class:top-highlight={isOver === task.id}
+  class:dragging={isOver !== false}
   class:task-done={task.done}>
   <input type="checkbox" bind:checked={task.done} />
-  <TextField bind:value={task.description} bind:strikethrough={task.done} />
+  <TextField 
+    bind:onDelete={deleteTask}
+    bind:value={task.description} 
+    bind:strikethrough={task.done} />
 </div>
 

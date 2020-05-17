@@ -1,12 +1,29 @@
 const uuid = require('uuid').v4;
+const { TASKS, ROOT_NODE_ID, LISTS } = require('./constants');
 
-const TASKS = 'tasks';
-const ROOT_NODE_ID = '00000000-0000-0000-0000-000000000000';
-const LISTS = 'lists';
+// helpers
+const findInCollection = (id , db, collection) => db.get(collection).find({ id });
 
+// TODO: major re-writing required to match updated schema
 const Query = {
-  async data(r, _, { db }) {
-    return db.getState();
+  async lists (r, _, { db }) {
+    return db.get(LISTS).value().map(l => ({
+      ...l,
+      tasks: db.get(TASKS)
+        .filter({listID : l.id})
+        .value(),
+    }));
+  },
+  async list(r, { id }, { db }) {
+    return {
+      ...findInCollection(id, db, LISTS).value(),
+      tasks: db.get(TASKS)
+        .where({listID : id})
+        .value(),
+    };
+  },
+  async task(r, { id }, { db }) {
+    return findInCollection(id, db, TASKS).value();
   },
 };
 const Mutation = {
@@ -21,25 +38,29 @@ const Mutation = {
     };
 
     // BAD: weird issue where lowdb does not recognise the root node I've manually inserted...
-    const rootNode = () => db.get(LISTS).find({ id: ROOT_NODE_ID }).value();
-    if (!rootNode()) db.get(LISTS).push({
-      id: ROOT_NODE_ID, 
-      next: null,
-      name: "root"
-    }).write();
+    const rootNode = findInCollection(ROOT_NODE_ID, db, LISTS);
+    if (!rootNode()){
+       db.get(LISTS).push({
+        id: ROOT_NODE_ID, 
+        next: null,
+        name: "root"
+      }).write();
+    }
 
     if (rootNode().next === null) {
-      db.get(LISTS)
-        .find({ id: ROOT_NODE_ID })
+      // Add first list
+      findInCollection(ROOT_NODE_ID, db, LISTS)
         .assign({ next: newList.id })
         .write();
     } else {
+      // Link list at the end to new list
       db.get(LISTS)
         .find({ next: null })
         .assign({ next: newList.id })
         .write();
     }
 
+    // Insert new list
     db.get(LISTS)
       .push(newList)
       .write();
@@ -51,7 +72,7 @@ const Mutation = {
   async listUpdate(r, { input }, { db }) {
     const { id, name } = input;
 
-    const list = db.get(LISTS).find({ id }).value();
+    const list = findInCollection(id, db, LISTS).value();
     if (!list) return new Error('List does not exist');
 
     db.get(LISTS)
@@ -61,7 +82,7 @@ const Mutation = {
       })
       .write();
 
-    return db.get(LISTS).find({id}).value();
+    return findInCollection(id, db, LISTS).value();
   },
   async listDestroy(r, { id }, { db }) {
     const list = db.get(LISTS).find({ id }).value();
@@ -124,10 +145,7 @@ const Mutation = {
 
     console.info(`PUSH ${JSON.stringify(newTask, null, 2)}`);
 
-    return {
-      tasks: db.get(TASKS).value(),
-      taskCreateID: newTask.id,
-    };
+    return findInCollection(newTask.id, db, TASKS);
   },
   async taskUpdate(r, { input }, { db }) {
     const { id, description, done, date } = input
@@ -149,9 +167,9 @@ const Mutation = {
     return db.get(TASKS).find({ id }).value();
   },
   async taskDestroy(r, { id }, { db }) {
-    const task = db.get(TASKS).find({id}).value();
+    const task = findInCollection(id, db, TASKS).value();
     if (!task) return new Error('Task does not exist');
-    const list = db.get(LISTS).find({ id: task.listID }).value();
+    const list = findInCollection(task.listID, db, LISTS).value();
     if (!list) return new Error('List does not exist');
 
     // Update list if task is root node
@@ -179,7 +197,7 @@ const Mutation = {
 
     return true;
   },
-  async taskReorder(r, { input }, { db }) {
+  async reorder(r, { input }, { db }) {
     const { fromID, toID } = input;
     const source = db.get(TASKS).find({id: fromID}).value();
     const target = db.get(TASKS).find({id: toID}).value();
@@ -217,7 +235,7 @@ const Mutation = {
       }
     }
 
-    return db.getState();
+    return true;
   },
 };
 

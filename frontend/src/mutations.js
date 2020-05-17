@@ -30,16 +30,13 @@ export const LIST_DESTORY = gql`
 
 export const TASK_CREATE = gql`
   mutation ($input: TaskCreateInput!){
-    taskCreate(input: $input) {
-      taskCreateID
-      tasks {
-        id
-        next
-        listID
-        description
-        done
-        date
-      }
+    newTask: taskCreate(input: $input) {
+      id
+      next
+      listID
+      description
+      done
+      date
     }
   }
 `;
@@ -59,7 +56,22 @@ export const TASK_UPDATE = gql`
 
 export const TASK_DESTROY = gql`
   mutation ($input: ID!){
-    taskDestroy(id: $input)
+    taskDestroy(id: $input) {
+      list {
+        id
+        next
+        root
+        name
+      }
+      tasks {
+        id
+        next
+        listID
+        description
+        done
+        date
+      }
+    }
   }
 `;
 

@@ -1,10 +1,12 @@
 import App from './components/App.svelte';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = new App({
   target: document.body,
   props: {
-    apiURL: 'http://localhost:3000', // TODO: move into env
-  }
+    apiURL: process.env.API_URL,
+  },
 });
 
 export default app;

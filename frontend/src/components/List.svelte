@@ -1,28 +1,32 @@
 <script>
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import { getClient, mutate } from 'svelte-apollo';
 
+  import { tasks } from '../stores';
   import { buildOrderedList, searchList } from '../utils';
   import { LIST_UPDATE, TASK_CREATE } from '../mutations';
-  import { tasks } from '../stores';
   import Task from './Task';
   import TextField from './TextField';
 
   export let list,
-   orderedTasks = [],
-   unsubsribeTasks,
    isOver,
    dragStart,
    dragOver, 
    dragLeave, 
    drop;
 
+  const dispatch = createEventDispatcher();
   const client = getClient();
 
   let newTaskDescription = '';
 
-  $: {
-    // Sync list name
+  $: listTasks =  (() => {
+    if (list.root === null) return [];
+    const lt = $tasks.filter(t => t.listID === list.id);
+    return buildOrderedList(searchList(list.root, lt), (_id) => searchList(_id, lt));
+  })();
+
+  let updateList = () => {
     mutate(client, {
       mutation: LIST_UPDATE,
       variables: {
@@ -33,16 +37,6 @@
       }
     })
     .catch(console.error);
-    // Load tasks
-    loadTasks($tasks);
-  }
-
-  const getTask = (taskID, tasks = $tasks) => searchList(taskID, tasks);
-
-  function loadTasks(tasks) {
-    if (list.root === null || tasks.length === 0) return;
-    const rootNode = getTask(list.root, tasks);
-    orderedTasks = buildOrderedList(rootNode, getTask, []);
   }
 
   function addTask() {
@@ -57,8 +51,9 @@
       }
     })
     .then(({data}) => {
-      if (list.root === null) list.root = data.taskCreate.taskCreateID;
-      tasks.set(data.taskCreate.tasks);
+      dispatch('createTask', {
+        payload: data.newTask,
+      });
       resetNewTaskField();
     })
     .catch(console.error);
@@ -67,12 +62,6 @@
   function resetNewTaskField() {
     newTaskDescription = '';
   }
-
-  onMount(()=> {
-    // Load tasks on tasks change
-    unsubsribeTasks = tasks.subscribe(loadTasks);
-  });
-  onDestroy(unsubsribeTasks);
 
 </script>
 
@@ -96,9 +85,9 @@
 
 <div class="list-content">
   <strong>
-    <TextField bind:value={list.name} />
+    <TextField bind:onEdit={updateList} bind:value={list.name} />
   </strong>
-  {#each orderedTasks as task}
+  {#each listTasks as task}
     <Task 
       task={task} 
       bind:isOver={isOver}

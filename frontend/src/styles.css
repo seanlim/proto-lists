@@ -1,5 +1,7 @@
 :root {
+  --accent: #0091ea;
   --background: #fafafa;
+  --highlight: #f5f5f5;
   --foreground: #212121;
   --gray: #898989;
   
@@ -9,6 +11,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #212121;
+    --highlight: #333;
     --foreground: #fafafa;
     --gray: #898989;
   }

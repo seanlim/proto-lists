@@ -1,32 +1,25 @@
 type Query {
-  data: DataResponse!
+  lists: [List]!
+  list(id: ID!): List!
+  task(id: ID!): Task!
 }
 
 type Mutation {
-  listCreate(input: ListCreateInput!): [List]!
+  listCreate(input: ListCreateInput!): List!
   listUpdate(input: ListUpdateInput!): List!
   listDestroy(id: ID!): Boolean!
 
-  taskCreate(input: TaskCreateInput!): TaskCreateResponse!
+  taskCreate(input: TaskCreateInput!): Task!
   taskUpdate(input: TaskUpdateInput!): Task!
   taskDestroy(id: ID!): Boolean!
-  taskReorder(input: TaskReorderInput!): DataResponse!
+
+  reorder(input: ReorderInput!): Boolean!
 }
 
-type DataResponse {
-  lists: [List]!
-  tasks: [Task]!
-}
-
-interface LinkedListNode {
-  next: ID
-}
-
-type List implements LinkedListNode {
+type List {
   id: ID!
-  next: ID
   name: String!
-  root: ID
+  tasks: [Task]
 }
 input ListCreateInput {
   name: String!
@@ -34,12 +27,10 @@ input ListCreateInput {
 input ListUpdateInput {
   id: ID!
   name: String!
-  root: ID
 }
 
-type Task implements LinkedListNode {
+type Task {
   id: ID!
-  next: ID
   listID: ID!
   description: String!
   done: Boolean!
@@ -50,17 +41,14 @@ input TaskCreateInput {
   description: String!
   date: String
 }
-type TaskCreateResponse {
-  tasks: [Task]!
-  taskCreateID: ID!
-}
 input TaskUpdateInput {
   id: ID!
   description: String!
   done: Boolean!
   date: String
 }
-input TaskReorderInput {
+
+input ReorderInput {
   fromID: ID!
   toID: ID!
 }

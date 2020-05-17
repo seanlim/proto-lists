@@ -3,7 +3,6 @@
   import ApolloClient from 'apollo-boost';  
   import { setClient, subscribe, mutate } from 'svelte-apollo';
 
-
   import { buildOrderedList, searchList } from '../utils';
   import { DATA } from '../queries';
   import { LIST_CREATE, TASK_REORDER } from '../mutations';
@@ -12,17 +11,15 @@
   import List from './List';
 
   export let apiURL;
-  const ROOT_NODE_ID = '00000000-0000-0000-0000-000000000000';
-  let unsubscribeLists;
   let loading = true; 
+
   let isOver = false; // TODO: name this better
-  let orderedLists = [];
 
   // Create new Apollo client
   const client = new ApolloClient({ uri: apiURL });
   setClient(client);
 
-  // Fetch lists 
+  // Fetch data
   const request = subscribe(client, { query: DATA });
   $request.then(({ data }) => {
     lists.set(data.data.lists);
@@ -31,13 +28,6 @@
   })
   .catch(console.error);
 
-  const getList = (listID) => searchList(listID, $lists);
-
-  function loadLists(lists) {
-    const rootNode = getList(ROOT_NODE_ID);
-    if (!rootNode || rootNode.next === null) return;
-    orderedLists = buildOrderedList(getList(rootNode.next), getList);
-  }
 
   async function addList() {
     mutate(client, {
@@ -98,11 +88,16 @@
     if (from.id !== to.id) reorderTasks({from, to});
   };
 
-  onMount(() => {
-    unsubscribeLists = lists.subscribe(loadLists)
-  });
-
-  onDestroy(unsubscribeLists);
+  function onTaskCreated(event) {
+    console.info(event);
+    const newTask = event.detail.payload;
+    tasks.update(t => [...t, newTask]);
+    if ($lists.filter(l => l.id === newTask.listID)[0].root === null) {
+      lists.update(ls => ls.map(l => l.id === newTask.listID 
+      ? ({ ...l, root: newTask.id })
+      : l));
+    }
+  }
 
 </script>
 
@@ -178,14 +173,15 @@
   </span>
 {:else}
   <div class="list-container">
-    {#if orderedLists.length < 1}
+    {#if $lists.length < 1}
       <div class="no-list">
         <p>No Lists</p>
       </div>
     {:else}
-      {#each orderedLists as list (list.id)}
+      {#each $lists as list (list.id)}
         <div class="list-wrapper">
           <List 
+            on:createTask={onTaskCreated}
             bind:list={list} 
             bind:isOver={isOver}
             bind:dragOver={dragOver}

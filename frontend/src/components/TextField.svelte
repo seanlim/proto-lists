@@ -1,10 +1,23 @@
 <script>
-  export let value = '', placeholder = '', strikethrough = false, onSubmit = null;
+  export let value = '', 
+    placeholder = '', 
+    strikethrough = false, 
+    onEdit = null,
+    onSubmit = null,
+    onDelete = null;
 
   function keyDown(event) {
     if (event.keyCode === 13 && onSubmit !== null) {
       onSubmit();
+      return;
     }
+    if (event.ctrlKey && event.keyCode === 68) {
+      console.info('deleting task');
+      onDelete();
+      return;
+    }
+
+    onEdit();
   }
 </script>
 
