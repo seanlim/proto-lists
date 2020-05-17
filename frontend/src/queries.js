@@ -1,17 +1,9 @@
 import { gql } from 'apollo-boost';
 
-export const LISTS = gql`
+export const PROJECT = gql`
   {
-    lists {
-      id
-      name
-      tasks {
-        id
-        listID
-        description
-        done
-        date
-      }
+    project {
+      lists
     }
   }
 `;

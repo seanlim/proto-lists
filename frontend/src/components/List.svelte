@@ -1,31 +1,32 @@
 <script>
-  import { onMount, onDestroy, createEventDispatcher } from 'svelte';
-  import { getClient, mutate } from 'svelte-apollo';
+  import { createEventDispatcher } from 'svelte';
+  import { getClient, mutate, query } from 'svelte-apollo';
 
   import { buildOrderedList, searchList } from '../utils';
   import { LIST_UPDATE, TASK_CREATE } from '../mutations';
+  import { LIST } from '../queries';
   import Task from './Task';
   import TextField from './TextField';
 
-  export let list,
+  export let listID,
    isOver,
    dragStart,
    dragOver, 
    dragLeave, 
    drop;
 
-  const dispatch = createEventDispatcher();
   const client = getClient();
+  const list = query(client, { query: LIST, variables: { input: listID } });
 
   let newTaskDescription = '';
 
-  let updateList = () => {
+  let updateList = (e) => {
     mutate(client, {
       mutation: LIST_UPDATE,
       variables: {
         input: {
-          id: list.id,
-          name: list.name.toString(),
+          id: listID,
+          name: e.detail.value,
         }
       }
     })
@@ -37,19 +38,21 @@
       mutation: TASK_CREATE,
       variables: {
         input: {
-          listID: list.id,
+          listID: listID,
           description: newTaskDescription,
-          date: '' // TODO: Add date for task;
+          date: (new Date()).toString(),
         }
       }
     })
     .then(({data}) => {
-      dispatch('createTask', {
-        payload: data.newTask,
-      });
+      list.refetch();
       resetNewTaskField();
     })
     .catch(console.error);
+  }
+
+  function onTaskDeleted(e) {
+    list.refetch();
   }
 
   function resetNewTaskField() {
@@ -59,19 +62,26 @@
 </script>
 
 <div class="list-content">
-  <strong>
-    <TextField bind:onEdit={updateList} bind:value={list.name} />
-  </strong>
-  {#each list.tasks as task}
-    <Task 
-      task={task} 
-      bind:isOver={isOver}
-      bind:dragOver={dragOver}
-      bind:dragLeave={dragLeave}
-      bind:drop={drop}
-      bind:dragStart={dragStart} />
-  {/each}
-  <TextField bind:value={newTaskDescription} onSubmit={addTask} placeholder="&#x2607; Add task..." />
+  {#await $list}
+    Loading...
+  {:then result} 
+    <strong>
+      <TextField on:submit={updateList} value={result.data.list.name} />
+    </strong>
+    {#each result.data.list.tasks as task (task.id)}
+      <Task 
+        task={task} 
+        on:deleted={onTaskDeleted}
+        bind:isOver={isOver}
+        bind:dragOver={dragOver}
+        bind:dragLeave={dragLeave}
+        bind:drop={drop}
+        bind:dragStart={dragStart} />
+    {/each}
+    <TextField bind:value={newTaskDescription} on:submit={addTask} placeholder="&#x2607; Add task..." />
+  {:catch error}
+    Error: { error }
+  {/await}
 </div>
 
 <style>

@@ -4,6 +4,7 @@
   import { TASK_UPDATE, TASK_DESTROY } from '../mutations';
   import { lists } from '../stores';
   import { searchList } from '../utils';
+  import { current_component } from "svelte/internal";
 
   import TextField from './TextField';
 
@@ -14,6 +15,7 @@
    dragLeave, 
    drop;
 
+	const dispatch = createEventDispatcher();
   const client = getClient();
 
   $: {
@@ -31,14 +33,15 @@
     .catch(console.error);
   }
 
-  let deleteTask = () => {
+  let deleteTask = (e) => {
     mutate(client, {
       mutation: TASK_DESTROY,
       variables: {
         input: task.id,
       },
     })
-    .then((res) => {
+    .then(({data}) => {
+      dispatch('deleted', {});
     })
     .catch(console.error);
   };
@@ -62,7 +65,8 @@
   class:task-done={task.done}>
   <input type="checkbox" bind:checked={task.done} />
   <TextField 
-    bind:onDelete={deleteTask}
+    id={task.id}
+    on:delete={deleteTask}
     bind:value={task.description} 
     bind:strikethrough={task.done} />
 </div>

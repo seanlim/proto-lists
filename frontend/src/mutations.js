@@ -50,19 +50,7 @@ export const TASK_UPDATE = gql`
 
 export const TASK_DESTROY = gql`
   mutation ($input: ID!){
-    taskDestroy(id: $input) {
-      list {
-        id
-        name
-      }
-      tasks {
-        id
-        listID
-        description
-        done
-        date
-      }
-    }
+    taskDestroy(id: $input)
   }
 `;
 

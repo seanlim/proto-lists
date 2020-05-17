@@ -1,24 +1,30 @@
 <script>
+  import { createEventDispatcher } from 'svelte';
+
   export let value = '', 
+    id = null,
     placeholder = '', 
-    strikethrough = false, 
-    onEdit = null,
-    onSubmit = null,
-    onDelete = null;
+    strikethrough = false;
+
+  const dispatch = createEventDispatcher();
 
   function keyDown(event) {
-    if (event.keyCode === 13 && onSubmit !== null) {
-      onSubmit();
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      dispatch('submit', { value });
       return;
     }
     if (event.ctrlKey && event.keyCode === 68) {
-      console.info('deleting task');
-      onDelete();
+      dispatch('delete', { id });
       return;
     }
 
-    onEdit && onEdit();
   }
+
+  function keyUp(event) {
+    dispatch('edit', { value });
+  }
+
 </script>
 
 <style>
@@ -48,7 +54,7 @@
 </style>
 
 <div class="textfield">
-  <span contenteditable on:keydown={keyDown} class:strikethrough class="content" bind:innerHTML={value}></span>
+  <span contenteditable on:keydown={keyDown} on:keyup={keyUp} class:strikethrough class="content" bind:innerHTML={value}></span>
   {#if value === ''}
     <span class="placeholder">{ placeholder }</span>
   {/if}

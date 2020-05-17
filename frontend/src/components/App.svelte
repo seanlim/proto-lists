@@ -1,33 +1,21 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import ApolloClient from 'apollo-boost';  
-  import { setClient, subscribe, mutate } from 'svelte-apollo';
+  import { setClient, query, mutate } from 'svelte-apollo';
 
   import { buildOrderedList, searchList } from '../utils';
-  import { LISTS } from '../queries';
+  import { PROJECT } from '../queries';
   import { LIST_CREATE, TASK_REORDER } from '../mutations';
-  import { lists } from '../stores';
 
   import List from './List';
 
-  export let apiURL;
-  let loading = true; 
-
   let isOver = false; // TODO: name this better
-
+  export let apiURL;
   // Create new Apollo client
   const client = new ApolloClient({ uri: apiURL });
   setClient(client);
 
-  // Fetch lists 
-  const request = subscribe(client, { query: LISTS });
-  $request.then(({ data }) => {
-    console.info(data);
-    lists.set(data.lists);
-    loading = false;
-  })
-  .catch(console.error);
-
+  const project = query(client, { query: PROJECT });
 
   async function addList() {
     mutate(client, {
@@ -38,7 +26,9 @@
         }
       }
     })
-    .then(({data}) => lists.set(data.listCreate))
+    .then(({data}) => {
+      //lists.set(data.listCreate)
+    })
     .catch(console.error);
   }
 
@@ -53,7 +43,7 @@
       }
     })
     .then(({data}) => {
-      lists.set(data.taskReorder.lists);
+      //lists.set(data.taskReorder.lists);
     })
     .catch(console.error);
   }
@@ -90,31 +80,31 @@
   function onTaskCreated(event) {
     console.info(event);
     const newTask = event.detail.payload;
-    if ($lists.filter(l => l.id === newTask.listID)[0].root === null) {
+    /*if ($lists.filter(l => l.id === newTask.listID)[0].root === null) {
       lists.update(ls => ls.map(l => l.id === newTask.listID 
       ? ({ ...l, root: newTask.id })
       : l));
-    }
+    }*/
   }
 
 </script>
 
-{#if loading}
+{#await $project}
   <span class="loading">
     ✏️ Loading...
   </span>
-{:else}
+{:then result}
   <div class="list-container">
-    {#if $lists.length < 1}
+    {#if result.data.project.lists.length < 1}
       <div class="no-list">
         <p>No Lists</p>
       </div>
     {:else}
-      {#each $lists as list (list.id)}
+      {#each result.data.project.lists as listID (listID)}
         <div class="list-wrapper">
           <List 
             on:createTask={onTaskCreated}
-            bind:list={list} 
+            listID={listID}
             bind:isOver={isOver}
             bind:dragOver={dragOver}
             bind:dragLeave={dragLeave}
@@ -127,7 +117,11 @@
       <b>+</b>
     </div>
   </div>
-{/if}
+{:catch error}
+  <span class="loading">
+    Error: { error }
+  </span>
+{/await}
 
 <style>
   .list-container {

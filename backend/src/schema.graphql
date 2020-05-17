@@ -1,5 +1,5 @@
 type Query {
-  lists: [List]!
+  project: Project!
   list(id: ID!): List!
   task(id: ID!): Task!
 }
@@ -14,6 +14,10 @@ type Mutation {
   taskDestroy(id: ID!): Boolean!
 
   reorder(input: ReorderInput!): Boolean!
+}
+
+type Project {
+  lists: [ID]!
 }
 
 type List {

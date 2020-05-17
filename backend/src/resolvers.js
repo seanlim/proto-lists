@@ -6,18 +6,16 @@ const { sortLinkedList } = require('./sort');
 const findInCollection = (id , db, collection) => db.get(collection).find({ id });
 
 const Query = {
-  async lists (r, _, { db }) {
+  async project (r, _, { db }) {
     const sortedLists = sortLinkedList(db.get(LISTS).value(), ROOT_NODE_ID, false);
-    return sortedLists.map(l => ({
-      ...l,
-      tasks: sortLinkedList(db.get(TASKS)
-        .filter({listID : l.id})
-        .value(), l.root, true),
-    }));
+    return {
+      lists: sortedLists.map(l => l.id),
+    };
   },
   async list(r, { id }, { db }) {
+    const l = findInCollection(id, db, LISTS).value();
     return ({
-      ...findInCollection(id, db, LISTS).value(),
+      ...l,
       tasks: sortLinkedList(db.get(TASKS)
         .filter({listID : l.id})
         .value(), l.root, true),
@@ -149,7 +147,7 @@ const Mutation = {
 
     console.info(`PUSH ${JSON.stringify(newTask, null, 2)}`);
 
-    return findInCollection(newTask.id, db, TASKS);
+    return findInCollection(newTask.id, db, TASKS).value();
   },
   async taskUpdate(r, { input }, { db }) {
     const { id, description, done, date } = input
