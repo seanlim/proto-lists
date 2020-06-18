@@ -2,4 +2,4 @@
 
 ![](./lists.png)
 
-Simple web interface prototype to help me manage running tasks across different projects.
+Simple web interface prototype to help de-paperize tracking of running tasks across different projects. 
